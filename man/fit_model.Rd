@@ -28,6 +28,7 @@ dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
 parmset=dat[[1]]
 yinit=dat[[2]]
 yinit.vector=dat[[3]]
-fitLL = fit_model(time_series = weekly_rsv, age_dist = c(.19,.11,.15,.08,.17,.30),
+weekly_rsv = round(timeseries[which(timeseries$state=="CA"),"value"])
+fitLL = fit_model(time_series = weekly_rsv, age_dist = c(.19,.11,.15,.25,.30),
 parmset=parmset,yinit=yinit,yinit.vector=yinit.vector)
 }

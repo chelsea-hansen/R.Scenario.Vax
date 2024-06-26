@@ -4,10 +4,10 @@
 \alias{MSIRS_immunization_dynamics}
 \title{MSIRS dynamic transmission model for RSV}
 \usage{
-MSIRS_immunization_dynamics(t, y, parms)
+MSIRS_immunization_dynamics(times, y, parms)
 }
 \arguments{
-\item{t}{A vector of numbers representing the number of weeks/months to run the model}
+\item{times}{A numeric vector of times}
 
 \item{y}{A vector of starting values for model compartments}
 
@@ -20,9 +20,11 @@ A matrix of values.
 MSIRS dynamic transmission model for RSV
 }
 \examples{
+
 dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
 parmset=dat[[1]]
-yinit=dat[[2]]
 yinit.vector=dat[[3]]
-results = MSIRS_immunization_dynamics(t=seq(1,100,by=1),y=yinit.vector,parms=parmset)
+fit_times = seq(1,100,by=1)
+parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)
+results <- MSIRS_immunization_dynamics(times=fit_times, y=yinit.vector,parms=parms)
 }

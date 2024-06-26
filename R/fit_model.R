@@ -21,7 +21,8 @@
 #' parmset=dat[[1]]
 #' yinit=dat[[2]]
 #' yinit.vector=dat[[3]]
-#' fitLL = fit_model(time_series = weekly_rsv, age_dist = c(.19,.11,.15,.08,.17,.30),
+#' weekly_rsv = round(timeseries[which(timeseries$state=="CA"),"value"])
+#' fitLL = fit_model(time_series = weekly_rsv, age_dist = c(.19,.11,.15,.25,.30),
 #' parmset=parmset,yinit=yinit,yinit.vector=yinit.vector)
 fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
@@ -41,7 +42,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
     reporting_rate = 1/(1+exp(-parameters[4])) #reporting rate = how many infections are reported as hospitalizations in the data
 
     # Simulate the model with initial conditions and timesteps defined above, and parameter values from function call
-    results <- ode(y=yinit.vector, method = "ode45", t=fit_times,
+    results <- ode(y=yinit.vector, method = "ode45", times=fit_times,
                    func=MSIRS_immunization_dynamics,
                    parms=c(parmset,baseline.txn.rate=baseline.txn.rate,b1=b1,phi=phi))
 
@@ -147,7 +148,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
   # Plot results with fit parameters   ---------------------------------------------
 
-  output <- ode(y=yinit.vector, t=fit_times,method = "ode45",
+  output <- ode(y=yinit.vector, times=fit_times,method = "ode45",
                 func=MSIRS_immunization_dynamics,
                 parms=c(parmset,
                         baseline.txn.rate=baseline.txn.rate,
@@ -222,10 +223,10 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   hosp_props = c(H3.1,H3.2,H3.3,H3.4,H3.5)
 
 
-  plot1 = ggplot()+
+  plot1 = ggplot2::ggplot()+
     theme_bw()+
-    geom_area(aes(x=1:201, y=time_series),fill="seashell3")+
-    geom_line(aes(x=1:201, y=H2),color="navy",linewidth=1.5)+
+    geom_area(aes(x=1:length(time_series), y=time_series),fill="seashell3")+
+    geom_line(aes(x=1:length(time_series), y=H2),color="navy",linewidth=1.5)+
     labs(x=NULL, y="RSV Hospitalizations")
   print(plot1)
 

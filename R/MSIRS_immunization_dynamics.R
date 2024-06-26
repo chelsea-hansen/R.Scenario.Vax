@@ -1,6 +1,6 @@
 #' MSIRS dynamic transmission model for RSV
 #'
-#' @param t A vector of numbers representing the number of weeks/months to run the model
+#' @param times A numeric vector of times
 #' @param y A vector of starting values for model compartments
 #' @param parms A list of fixed parameter values
 #'
@@ -8,12 +8,17 @@
 #' @export
 #'
 #' @examples
+#'
+
 #' dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
 #' parmset=dat[[1]]
-#' yinit=dat[[2]]
 #' yinit.vector=dat[[3]]
-#' results = MSIRS_immunization_dynamics(t=seq(1,100,by=1),y=yinit.vector,parms=parmset)
-MSIRS_immunization_dynamics <- function(t,y,parms){
+#' fit_times = seq(1,100,by=1)
+#' parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)
+#' results <- MSIRS_immunization_dynamics(times=fit_times, y=yinit.vector,parms=parms)
+
+
+MSIRS_immunization_dynamics <- function(times,y,parms){
 
   States<-array(y, dim=dim(parms$yinit.matrix))
   dimnames(States) <- dimnames(parms$yinit.matrix)
@@ -36,19 +41,19 @@ MSIRS_immunization_dynamics <- function(t,y,parms){
 
 
   #parameters for monoclonals
-  birth_N = parms$monoclonal_birth[t]#infants who receive birth dose of nirsevimab
-  cup_N = parms$monoclonal_catchup[t] #infants who receive nirsevimab catch-up dose
+  birth_N = parms$monoclonal_birth[times]#infants who receive birth dose of nirsevimab
+  cup_N = parms$monoclonal_catchup[times] #infants who receive nirsevimab catch-up dose
   waningN=1/(parms$waningN/length.step) #duration of nirsevimab protection
   RRIn=parms$RRIn #relative risk of infection for infants receiving nirsevimab (default is to set to 1)
 
   #parameters for maternal vaccines
-  birth_V = parms$maternal_vax[t]#infants born to vaccinated mothers
+  birth_V = parms$maternal_vax[times]#infants born to vaccinated mothers
   waningV=1/(parms$waningV/length.step)#duration of maternal vaccine
   RRIv=parms$RRIv
 
 
   #parameters for seniors
-  V_s=parms$senior_vax[t] # indicator function for when the vaccine will be administered * vaccine coverage
+  V_s=parms$senior_vax[times] # indicator function for when the vaccine will be administered * vaccine coverage
   waningS=1/(parms$waningS/2/length.step) #duration of protection from vaccination (divided by 2 because 2 compartments)
   RRIs=parms$RRIs #relative risk of infection for vaccinated seniors
 
@@ -94,7 +99,7 @@ MSIRS_immunization_dynamics <- function(t,y,parms){
   N.ages <- length(M0)
 
   ####################
-  seasonal.txn <- (1+parms$b1*cos(2*pi*(t-parms$phi*period)/period))# seasonality waves
+  seasonal.txn <- (1+parms$b1*cos(2*pi*(times-parms$phi*period)/period))# seasonality waves
 
   # baseline.txn.rate is the probability of transmission given contact per capita
   # (parms$dur.days1/length.step) is the duration of infectiousness of primary infection
