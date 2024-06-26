@@ -1,6 +1,6 @@
-#' Format required data for RSV model
+#' Download and format data for RSV dynamic transmission model
 #'
-#' @param state_or_county Are you modeling for a "state" or a "county"
+#' @param state_or_county describe if you are modeling for a "state" or a "county"
 #' @param state_abbr The two letter state abbreviation (you need this even if you are modeling a county)
 #' @param county_name The name of the county (if modeling a state list NULL here)
 #'
@@ -62,7 +62,7 @@ get_data = function(state_or_county, state_abbr, county_name){
     breakdown_labels = TRUE,
     state = state_abbr,
     county = county_name)%>%
-    select(.data$AGEGROUP,.data$value)
+    select("AGEGROUP","value")
 
   pop = tail(pop,18)
 
@@ -108,10 +108,10 @@ get_data = function(state_or_county, state_abbr, county_name){
     state = state_abbr,
     county = county_name)
 
-  birth_rate = vital_stats %>%  dplyr::filter(.data$variable=="RBIRTH") %>%  dplyr::select(.data$value)/1000
+  birth_rate = vital_stats %>%  dplyr::filter(.data$variable=="RBIRTH") %>%  dplyr::select("value")/1000
   birth=c(birth_rate$value, rep(0,12))
 
-  mig_rate = vital_stats %>%  dplyr::filter(.data$variable=="RNETMIG") %>%  dplyr::select(.data$value)/1000
+  mig_rate = vital_stats %>%  dplyr::filter(.data$variable=="RNETMIG") %>%  dplyr::select("value")/1000
   um = mig_rate$value*-1/52.1775
 
 

@@ -1,15 +1,18 @@
 Package: RSVimmunizations
-Title: What the Package Does (One Line, Title Case)
+Title: Scenario Projections for RSV Hospitalizations
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Chelsea", "Hansen",  ,"chelsea.hansen@nih.gov", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4526-6772"))
+Description: This package will fit a dynamic RSV transmission model to time series data and run scenario projections for immunization uptake.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: tidycensus, dplyr, magrittr
-ImportsFrom: utils tail
+Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs
+ImportsFrom: utils tail head stats dpois optim
 URL: https://github.com/chelsea-hansen/RSVimmunizations
 BugReports: https://github.com/chelsea-hansen/RSVimmunizations/issues
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
