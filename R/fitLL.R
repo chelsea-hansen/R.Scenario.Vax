@@ -1,0 +1,19 @@
+#' Fitted parameter values
+#'
+#' The output from the fit_model function
+#'
+#'
+#'
+#' @format ## `fitLL`
+#' A list with 6 items:
+#' \describe{
+#'   \item{list item 1}{a numeric value representing the fitted baseline transmission rate}
+#'   \item{list item 2}{a numeric value representing the fitted amplitude of seasonal forcing}
+#'   \item{list item 3}{a numeric value representing the fitted phase of seasonal forcing}
+#'   \item{list item 4}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations (reporting rate)}
+#'   \item{list item 5}{a numeric vector representing age specific reporting rates}
+#'   \item{list item 6}{a matix with 3 columns and 100 rows representing the parameters values (baseline transmission, amplitude, phase) resampled using latin hypercube sampling}
+#'   ...
+#' }
+#'
+"fitLL"

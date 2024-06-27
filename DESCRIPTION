@@ -9,8 +9,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs
-ImportsFrom: utils tail head stats dpois optim
+Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs, cdcfluview, cowplot, pracma
+ImportsFrom: utils tail head stats dpois optim pracma sigmoid
 URL: https://github.com/chelsea-hansen/RSVimmunizations
 BugReports: https://github.com/chelsea-hansen/RSVimmunizations/issues
 Suggests: 
