@@ -21,6 +21,7 @@
 #' @param monoclonal_birth_end The end date of monoclonal antibody birth doses
 #' @param monoclonal_birth_doses The number of monoclonal antibody doses administered as birth doses
 #' @param scenario_name A user defined scenario name. Suggest to name Scenarios A,B,C, D, etc.
+#' @param confidence_intervals Whether to calculate confidence intervals.Default = TRUE
 #'
 #' @return A data frame of weekly RSV hospitalizations by age group for the user defined projection period.
 #' @export
@@ -31,6 +32,9 @@
 #' @import cdcfluview
 #' @import cowplot
 #' @importFrom pracma sigmoid
+#' @importFrom stats median quantile
+#' @importFrom tidyr pivot_longer
+#'
 #
 #'
 #' @examples
@@ -38,7 +42,7 @@
 #' parmset=dat[[1]]
 #' yinit=dat[[2]]
 #' yinit.vector=dat[[3]]
-#' scenario_a = scenario_projection1(fitted_parms=fitLL,
+#' scenario_a = scenario_projection(fitted_parms=fitLL,
 #'                             parmset = parmset,
 #'                             yinit=yinit,
 #'                             yinit.vector=yinit.vector,
@@ -58,7 +62,8 @@
 #'                             monoclonal_birth_start = '2024-10-01',
 #'                             monoclonal_birth_end = '2025-04-01',
 #'                             monoclonal_birth_doses = 50000,
-#'                             scenario_name="Scenario A")
+#'                             scenario_name="Scenario A",
+#'                             confidence_intervals=TRUE)
 scenario_projection = function(fitted_parms,
                                 parmset,
                                 yinit,
@@ -79,7 +84,8 @@ scenario_projection = function(fitted_parms,
                                  monoclonal_birth_start,
                                  monoclonal_birth_end,
                                  monoclonal_birth_doses,
-                                 scenario_name){
+                                 scenario_name,
+                                 confidence_intervals=TRUE){
 
 
   dates = data.frame(dates=seq(from=as.Date(data_start), to=as.Date(projection_end), by="weeks")) %>%
@@ -148,6 +154,126 @@ scenario_projection = function(fitted_parms,
   parmset$maternal_vax = maternal_vax
   parmset$senior_vax = senior_vax
 
+  if(confidence_intervals==TRUE){
+    newH=data.frame(date=NA, sample=NA,Age=NA,value=NA)
+    for(l in 1:100){
+      parmset$baseline.txn.rate=fitted_parms[[6]][l,"beta"]
+      parmset$b1=fitted_parms[[6]][l,"b1"]
+      parmset$phi=fitted_parms[[6]][l,"phi"]
+      hosp_prop = fitted_parms[[5]]
+
+      output <- ode(y=yinit.vector, times=fit_times,method = "ode45",
+                    func=MSIRS_immunization_dynamics,
+                    parms=parmset)
+
+      t0=nrow(dates)
+      al <- nrow(yinit)
+      output <- tail(output,t0)
+      St <- output[,-1]
+      I1 <- St[,grep('I1', colnames(St))]
+      I2 <- St[,grep('I2', colnames(St))]
+      I3 <- St[,grep('I3', colnames(St))]
+      I4 <- St[,grep('I4', colnames(St))]
+      S1 <- St[,grep('S1', colnames(St))]
+      S2 <- St[,grep('S2', colnames(St))]
+      S3 <- St[,grep('S3', colnames(St))]
+      S0 <- St[,grep('S0', colnames(St))]
+      R1 <- St[,grep('R1', colnames(St))]
+      R2 <- St[,grep('R2', colnames(St))]
+      R3 <- St[,grep('R3', colnames(St))]
+      R4 <- St[,grep('R4', colnames(St))]
+      M0<- St[,grep('M0', colnames(St))]
+      Si<- St[,grep('Si', colnames(St))]
+      Mn<- St[,grep('Mn', colnames(St))]
+      Mv<- St[,grep('Mv', colnames(St))]
+      N<- St[,grep('N', colnames(St))]
+      Vs1<- St[,grep('Vs1', colnames(St))]
+      Vs2<- St[,grep('Vs2', colnames(St))]
+
+      beta <-  parmset$baseline.txn.rate/(parmset$dur.days1/7)/(sum(yinit)^(1-parmset$q))*parmset$c2
+
+
+      lambda1=matrix(0,nrow=t0,ncol=al)#Force of infection
+      for (t in 1:t0){
+        lambda1[t,] <- as.vector((1+parmset$b1*cos(2*pi*(t-parmset$phi*52.1775)/52.1775))*((I1[t,]+parmset$rho1*I2[t,]+parmset$rho2*I3[t,]+parmset$rho2*I4[t,]+parmset$seed)%*%beta)/sum(St[t,]))}
+
+
+      hosp = c(rep(hosp_prop[1],3),rep(hosp_prop[2],3),rep(hosp_prop[3],2),rep(hosp_prop[4],4),hosp_prop[5])
+      H1=matrix(0,nrow=t0,ncol=al)#Number of hospitalizations by age
+      for (i in 1:al){
+        H1[,i]=
+          hosp[i]*parmset$RRHm*parmset$sigma3*M0[,i]*lambda1[,i]+
+          hosp[i]*parmset$RRHn*parmset$RRIn*parmset$sigma3*Mn[,i]*lambda1[,i]+
+          hosp[i]*parmset$RRHm*parmset$RRHv*parmset$RRIv*parmset$sigma3*Mv[,i]*lambda1[,i]+
+          hosp[i]*parmset$RRHn*parmset$RRIn*N[,i]*lambda1[,i]+
+          hosp[i]*S0[,i]*lambda1[,i]+
+          hosp[i]*Si[,i]*lambda1[,i]+
+          hosp[i]*parmset$sigma1*S1[,i]*lambda1[,i]+
+          hosp[i]*parmset$sigma2*S2[,i]*lambda1[,i]+
+          hosp[i]*parmset$sigma3*S3[,i]*lambda1[,i]+
+          hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs1[,i]*lambda1[,i]+
+          hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs2[,i]*lambda1[,i]}
+
+
+      H2 = cbind(rowSums(H1[,1:3]),
+                 rowSums(H1[,4:6]),
+                 rowSums(H1[,7:8]),
+                 rowSums(H1[,9:12]),
+                 H1[,13])
+
+
+
+      H = data.frame(H2)
+      names(H)=c("<6m","6-11m","1-4yrs","5-59yrs","60+yrs")
+      H$All = rowSums(H2)
+      H$date = dates$new_date
+
+      H = H %>% filter(.data$date>=projection_start) %>%
+        mutate(sample=l) %>%
+        pivot_longer(cols=c("<6m":"All"),names_to="Age",values_to="value")
+
+
+      newH=rbind(newH,H)
+
+
+    }
+
+    newH=newH %>%  filter(!is.na(.data$date)) %>% mutate(date=as.Date(.data$date))
+
+    results = newH %>%
+      group_by(.data$date, .data$Age) %>%
+      summarize(median = median(.data$value),
+                lower = quantile(.data$value, probs=0.025),
+                upper = quantile(.data$value, probs=0.975)) %>%
+      mutate(scenario = scenario_name)
+
+
+    totals = results %>%
+      group_by(.data$Age) %>%
+      summarize(median = sum(.data$median),
+                lower = sum(.data$lower),
+                upper = sum (.data$upper)) %>%
+      mutate(scenario_name,
+             Age=factor(.data$Age,levels=c("<6m","6-11m","1-4yrs","5-59yrs","60+yrs","All")))
+
+
+
+    plot1 = ggplot(data=results %>% filter(.data$Age=="All"))+
+      theme_bw()+
+      geom_ribbon(aes(x=date, ymin=.data$lower, ymax=.data$upper),color="steelblue",alpha=0.3)+
+      geom_line(aes(x=date, y=.data$median),color="navy",linewidth=1.5)+
+      labs(x=NULL, y="Weekly RSV Hospitalizations/ED Visits")
+
+    plot2 = ggplot(data=totals)+
+      theme_bw()+
+      geom_bar(aes(x=.data$Age, y=.data$median),stat="identity",fill="navy")+
+      geom_errorbar(aes(x=.data$Age,ymin=.data$lower,ymax=.data$upper),width=0.2)+
+      geom_text(aes(x=.data$Age, y=.data$upper+200,label=round(.data$median)))+
+      labs(x=NULL,y="Total RSV Hospitalizations/ED Visits")
+    plot3 = plot_grid(plot1,plot2, ncol=2)
+    print(plot3)
+
+  } else{
   baseline.txn.rate = fitted_parms[[1]]
   b1 = fitted_parms[[2]]
   phi = fitted_parms[[3]]
@@ -223,10 +349,10 @@ scenario_projection = function(fitted_parms,
   age_list = c("<6m","5-11m","1-4yrs","5-59yrs","60+yrs","All")
   names(H)=age_list
   H$date = dates$new_date
-  H = H %>% filter(date>=projection_start) %>%
+  results = H %>% filter(date>=projection_start) %>%
     mutate(scenario=scenario_name)
 
-  totals = H %>% select(-"date", -"scenario")
+  totals = results %>% select(-"date", -"scenario")
   totals=data.frame(total = colSums(totals)) %>%
     mutate(age = age_list,
            age=factor(.data$age,levels=c("<6m","6-11m","1-4yrs","5-59yrs","60+yrs","All")))
@@ -244,8 +370,8 @@ scenario_projection = function(fitted_parms,
 
   plot3 = plot_grid(plot1,plot2, ncol=2)
   print(plot3)
-
-  return(H)
+}
+  return(results)
 
 }
 
