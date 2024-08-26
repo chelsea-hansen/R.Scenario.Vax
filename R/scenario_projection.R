@@ -145,8 +145,8 @@ scenario_projection = function(fitted_parms,
   #bir_cum
   #plot(tail(bir_cum,50))
 
-  check = cbind(senior_vax, maternal_vax, monoclonal_catchup, monoclonal_birth)[53:465,1:4]
-  check2 = cbind(dates, check)
+  #check = cbind(senior_vax, maternal_vax, monoclonal_catchup, monoclonal_birth)[53:465,1:4]
+  #check2 = cbind(dates, check)
 
 
   parmset$monoclonal_birth = monoclonal_birth
