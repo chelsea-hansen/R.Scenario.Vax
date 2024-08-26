@@ -118,11 +118,11 @@ get_data = function(state_or_county, state_abbr, county_name){
   parmset<-list(PerCapitaBirthsYear=birth,
                 WidthAgeClassMonth=c(rep(2,times=6), 12,12*3, 60, 120, 240, 240, 240),#time spend in each age class (months)
                 DurationMatImmunityDays = 112,#duration of maternal immunity (days)
-                RRHm = 0.7,#relative risk of hospitalization given infection for those with maternal immunity
+                RRHm = 1,#relative risk of hospitalization given infection for those with maternal immunity
                 recover1 = 365.25*.5, #days spent in R1 compartment
                 recover2 = 365.25*.5, #days spent in R2 compartment
-                recover3 = 365.25,#days spent in R3 compartment
-                recover4 = 365.25,#days spent in R4 compartment
+                recover3 = 358.9,#days spent in R3 compartment
+                recover4 = 358.9,#days spent in R4 compartment
                 um=um, #net death and migration rate
                 rho1=0.75,#relative infectiousness following first infection
                 rho2=0.51,#relative infectiousness following 2+ infections
@@ -132,21 +132,21 @@ get_data = function(state_or_county, state_abbr, county_name){
                 yinit.matrix=yinit, #initial compartments
                 q=1,
                 c2=contact,
-                sigma1=0.76,#reduced susceptibility following first infection
-                sigma2=0.6,#reduced susceptibility following second infection
-                sigma3=0.4,#reduced susceptibility following third infection (and with maternal immunity)
+                sigma1=0.89,#reduced susceptibility following first infection
+                sigma2=0.89*0.81,#reduced susceptibility following second infection
+                sigma3=0.89*0.81*0.33,#reduced susceptibility following third infection (and with maternal immunity)
                 length.step = 7,
                 time.step='week',
                 seed=seed,
-                waningN = 180,
+                waningN = 150,
                 waningV=180,
                 waningS = 730.5,
                 RRIn=1,
                 RRIv=1,
                 RRIs=1,
                 RRHn=.2,
-                RRHv=.3,
-                RRHs=.1)
+                RRHv=.45,
+                RRHs=.2)
 
   return(list(parmset,yinit, yinit.vector))
 }
