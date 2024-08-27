@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(RSVimmunizations)
+library(R.Scenario.Vax)
 
-test_check("RSVimmunizations")
+test_check("R.Scenario.Vax")

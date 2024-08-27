@@ -1,4 +1,4 @@
-Package: R-Scenario-Vax
+Package: R.Scenario.Vax
 Title: Scenario Projections for RSV Hospitalizations
 Version: 0.0.0.9000
 Authors@R: 
@@ -11,8 +11,8 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs, cdcfluview, cowplot, pracma, tidyr
 ImportsFrom: utils tail head stats dpois optim median quantile pracma sigmoid tidyr pivot_longer
-URL: https://github.com/chelsea-hansen/RSVimmunizations
-BugReports: https://github.com/chelsea-hansen/RSVimmunizations/issues
+URL: https://github.com/chelsea-hansen/R.Scenario.Vax
+BugReports: https://github.com/chelsea-hansen/R.Scenario.Vax/issues
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
