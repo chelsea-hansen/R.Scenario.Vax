@@ -7,17 +7,17 @@
 \format{
 \subsection{\code{timeseries}}{
 
-A data frame with 4,409 rows and 3 columns:
+A data frame with 4,053 rows and 3 columns:
 \describe{
 \item{date}{MMWR week}
-\item{state}{state abbreviation}
+\item{state}{state name}
 \item{value}{estimated number of RSV hospitalizations}
 ...
 }
 }
 }
 \source{
-\url{https://github.com/midas-network/rsv-scenario-modeling-hub/tree/main/target-data}
+\url{https://data.cdc.gov/Public-Health-Surveillance/Rates-of-Laboratory-Confirmed-RSV-COVID-19-and-Flu/kvib-3txy/about_data}
 }
 \usage{
 timeseries

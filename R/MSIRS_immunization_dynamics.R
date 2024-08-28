@@ -104,11 +104,11 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
 
   transmission_unittime <-  parms$baseline.txn.rate/(parms$dur.days1/length.step)
 
-  beta=transmission_unittime*parms$c2*parms$npi[times]
+  beta=transmission_unittime*parms$c2
 
   beta_a_i <- seasonal.txn * beta/(sum(States)^parms$q)
 
-  infectiousN <- I1 + parms$rho1*I2 + parms$rho2*I3 + parms$rho2*I4 + parms$introductions[times]
+  infectiousN <- I1 + parms$rho1*I2 + parms$rho2*I3 + parms$rho2*I4 + parms$seed
 
   lambda <- infectiousN %*% beta_a_i
 
@@ -118,7 +118,7 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
   dy <- matrix(NA, nrow=N.ages, ncol=ncol(States))
   colnames(dy) <- colnames(States)
 
-  period.birth.rate <-parms$PerCapitaBirthsYear #daily number of births
+  period.birth.rate <-parms$PerCapitaBirthsYear #weekly number of births
   Aging.Prop <- c(0,mu[1:(N.ages-1)])
 
 

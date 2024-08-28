@@ -55,10 +55,12 @@ get_data = function(state_or_county, state_abbr, county_name){
 
   colnames(burn_in)= c("M0","S0","I1","R1","S1","I2","R2","S2","I3","R3","S3","I4","R4","Mn","Mv","N","Si","Vs1","Vs2")
 
-  pop = tidycensus::get_estimates(
+
+
+pop = tidycensus::get_estimates(
     geography = state_or_county,
     product = "characteristics",
-    breakdown = "AGEGROUP",
+    breakdown = c("AGEGROUP"),
     breakdown_labels = TRUE,
     state = state_abbr,
     county = county_name)%>%
@@ -108,7 +110,7 @@ get_data = function(state_or_county, state_abbr, county_name){
     state = state_abbr,
     county = county_name)
 
-  birth_rate = vital_stats %>%  dplyr::filter(.data$variable=="RBIRTH") %>%  dplyr::select("value")/1000
+  birth_rate = vital_stats %>%  dplyr::filter(.data$variable=="BIRTHS") %>%  dplyr::select("value")/52.1775
   birth=c(birth_rate$value, rep(0,12))
 
   mig_rate = vital_stats %>%  dplyr::filter(.data$variable=="RNETMIG") %>%  dplyr::select("value")/1000

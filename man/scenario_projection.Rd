@@ -2,7 +2,7 @@
 % Please edit documentation in R/scenario_projection.R
 \name{scenario_projection}
 \alias{scenario_projection}
-\title{Scenario Projection - No uncertainty intervals}
+\title{Scenario Projections}
 \usage{
 scenario_projection(
   fitted_parms,
@@ -78,7 +78,7 @@ scenario_projection(
 A data frame of weekly RSV hospitalizations by age group for the user defined projection period.
 }
 \description{
-Scenario Projection - No uncertainty intervals
+Run scenario projections for different immunization coverage
 }
 \examples{
 dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
@@ -94,8 +94,8 @@ scenario_a = scenario_projection(fitted_parms=fitLL,
                             projection_end = '2025-06-01',
                             senior_start = '2024-08-01',
                             senior_end = '2025-05-01',
-                            senior_doses = .15,
-                            senior_doses_last_year=.15,
+                            senior_doses = 100000,
+                            senior_doses_last_year=250000,
                             maternal_start = '2024-09-01',
                             maternal_end = '2025-04-01',
                             maternal_doses = 50000,

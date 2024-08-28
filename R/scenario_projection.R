@@ -1,4 +1,6 @@
-#' Scenario Projection - No uncertainty intervals
+#' Scenario Projections
+#'
+#' Run scenario projections for different immunization coverage
 #'
 #' @param fitted_parms A list of fitted parameters estimated using the fit_model function
 #' @param parmset A list of fixed parameters
@@ -51,8 +53,8 @@
 #'                             projection_end = '2025-06-01',
 #'                             senior_start = '2024-08-01',
 #'                             senior_end = '2025-05-01',
-#'                             senior_doses = .15,
-#'                             senior_doses_last_year=.15,
+#'                             senior_doses = 100000,
+#'                             senior_doses_last_year=250000,
 #'                             maternal_start = '2024-09-01',
 #'                             maternal_end = '2025-04-01',
 #'                             maternal_doses = 50000,
@@ -149,18 +151,26 @@ scenario_projection = function(fitted_parms,
   #check2 = cbind(dates, check)
 
 
-  parmset$monoclonal_birth = monoclonal_birth
-  parmset$monoclonal_catchup = monoclonal_catchup
+  #parmset$monoclonal_birth = monoclonal_birth
+  #parmset$monoclonal_catchup = monoclonal_catchup
+  parmset$monoclonal_01 = monoclonal_birth
+  parmset$monoclonal_23 = monoclonal_catchup*.34
+  parmset$monoclonal_45 = monoclonal_catchup*.33
+  parmset$monoclonal_67 = monoclonal_catchup*.33
   parmset$maternal_vax = maternal_vax
   parmset$senior_vax = senior_vax
 
   if(confidence_intervals==TRUE){
     newH=data.frame(date=NA, sample=NA,Age=NA,value=NA)
     for(l in 1:100){
-      parmset$baseline.txn.rate=fitted_parms[[6]][l,"beta"]
-      parmset$b1=fitted_parms[[6]][l,"b1"]
-      parmset$phi=fitted_parms[[6]][l,"phi"]
-      hosp_prop = fitted_parms[[5]]
+      parmset$baseline.txn.rate=fitted_parms[[8]][l,"beta"]
+      parmset$b1=fitted_parms[[8]][l,"b1"]
+      parmset$phi=fitted_parms[[8]][l,"phi"]
+      #hosp_prop = fitted_parms[[5]]
+      report_seniors = fitted_parms[[4]]
+      report_infants = fitted_parms[[5]]
+      report_children = fitted_parms[[6]]
+      report_adults = fitted_parms[[7]]
 
       output <- ode(y=yinit.vector, times=fit_times,method = "ode45",
                     func=MSIRS_immunization_dynamics,
@@ -198,22 +208,42 @@ scenario_projection = function(fitted_parms,
         lambda1[t,] <- as.vector((1+parmset$b1*cos(2*pi*(t-parmset$phi*52.1775)/52.1775))*((I1[t,]+parmset$rho1*I2[t,]+parmset$rho2*I3[t,]+parmset$rho2*I4[t,]+parmset$seed)%*%beta)/sum(St[t,]))}
 
 
-      hosp = c(rep(hosp_prop[1],3),rep(hosp_prop[2],3),rep(hosp_prop[3],2),rep(hosp_prop[4],4),hosp_prop[5])
-      H1=matrix(0,nrow=t0,ncol=al)#Number of hospitalizations by age
-      for (i in 1:al){
-        H1[,i]=
-          hosp[i]*parmset$RRHm*parmset$sigma3*M0[,i]*lambda1[,i]+
-          hosp[i]*parmset$RRHn*parmset$RRIn*parmset$sigma3*Mn[,i]*lambda1[,i]+
-          hosp[i]*parmset$RRHm*parmset$RRHv*parmset$RRIv*parmset$sigma3*Mv[,i]*lambda1[,i]+
-          hosp[i]*parmset$RRHn*parmset$RRIn*N[,i]*lambda1[,i]+
-          hosp[i]*S0[,i]*lambda1[,i]+
-          hosp[i]*Si[,i]*lambda1[,i]+
-          hosp[i]*parmset$sigma1*S1[,i]*lambda1[,i]+
-          hosp[i]*parmset$sigma2*S2[,i]*lambda1[,i]+
-          hosp[i]*parmset$sigma3*S3[,i]*lambda1[,i]+
-          hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs1[,i]*lambda1[,i]+
-          hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs2[,i]*lambda1[,i]}
+     # hosp = c(rep(hosp_prop[1],3),rep(hosp_prop[2],3),rep(hosp_prop[3],2),rep(hosp_prop[4],4),hosp_prop[5])
+    #  H1=matrix(0,nrow=t0,ncol=al)#Number of hospitalizations by age
+    #  for (i in 1:al){
+     #   H1[,i]=
+      #    hosp[i]*parmset$RRHm*parmset$sigma3*M0[,i]*lambda1[,i]+
+      #    hosp[i]*parmset$RRHn*parmset$RRIn*parmset$sigma3*Mn[,i]*lambda1[,i]+
+       #   hosp[i]*parmset$RRHm*parmset$RRHv*parmset$RRIv*parmset$sigma3*Mv[,i]*lambda1[,i]+
+      #    hosp[i]*parmset$RRHn*parmset$RRIn*N[,i]*lambda1[,i]+
+       #   hosp[i]*S0[,i]*lambda1[,i]+
+       #   hosp[i]*Si[,i]*lambda1[,i]+
+        #  hosp[i]*parmset$sigma1*S1[,i]*lambda1[,i]+
+       #   hosp[i]*parmset$sigma2*S2[,i]*lambda1[,i]+
+       #   hosp[i]*parmset$sigma3*S3[,i]*lambda1[,i]+
+       #   hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs1[,i]*lambda1[,i]+
+       #   hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs2[,i]*lambda1[,i]}
 
+      hosp1 <- c(report_infants, report_infants*0.59, report_infants*0.33, report_infants*0.2, report_infants*0.15, report_infants*0.15, rep(report_children, 2), rep(.001, 5))
+      hosp2 <- hosp1 * 0.4
+      hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors)
+
+
+      H1 <- matrix(0, nrow = t0, ncol = al)
+      for (i in 1:al) {
+        H1[, i] <-
+          hosp1[i] * parmset$RRHm * parmset$sigma3 * M0[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHm * parmset$sigma3 * Mn[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHm * parmset$sigma3 * Mv[, i] * lambda1[, i] +
+          hosp1[i] * N[, i] * lambda1[, i] +
+          hosp1[i] * S0[, i] * lambda1[, i] +
+          hosp1[i] * Si[, i] * lambda1[, i] +
+          hosp2[i] * parmset$sigma1 * S1[, i] * lambda1[, i] +
+          hosp3[i] * parmset$sigma2 * S2[, i] * lambda1[, i] +
+          hosp3[i] * parmset$sigma3 * S3[, i] * lambda1[, i] +
+          hosp3[i] * parmset$sigma3 * Vs1[, i] * lambda1[, i] +
+          hosp3[i] * parmset$sigma3 * Vs2[, i] * lambda1[, i]
+      }
 
       H2 = cbind(rowSums(H1[,1:3]),
                  rowSums(H1[,4:6]),
@@ -224,7 +254,7 @@ scenario_projection = function(fitted_parms,
 
 
       H = data.frame(H2)
-      names(H)=c("<6m","6-11m","1-4yrs","5-59yrs","60+yrs")
+      names(H)=c("<6m","6-11m","1-4yrs","5-64yrs","65+yrs")
       H$All = rowSums(H2)
       H$date = dates$new_date
 
@@ -254,7 +284,7 @@ scenario_projection = function(fitted_parms,
                 lower = sum(.data$lower),
                 upper = sum (.data$upper)) %>%
       mutate(scenario_name,
-             Age=factor(.data$Age,levels=c("<6m","6-11m","1-4yrs","5-59yrs","60+yrs","All")))
+             Age=factor(.data$Age,levels=c("<6m","6-11m","1-4yrs","5-64yrs","65+yrs","All")))
 
 
 
@@ -277,7 +307,7 @@ scenario_projection = function(fitted_parms,
   baseline.txn.rate = fitted_parms[[1]]
   b1 = fitted_parms[[2]]
   phi = fitted_parms[[3]]
-  hosp_prop = fitted_parms[[5]]
+  #hosp_prop = fitted_parms[[5]]
 
   output <- ode(y=yinit.vector, times=fit_times,method = "ode45",
                 func=MSIRS_immunization_dynamics,
@@ -317,23 +347,26 @@ scenario_projection = function(fitted_parms,
   for (t in 1:t0){
     lambda1[t,] <- as.vector((1+b1*cos(2*pi*(t-phi*52.1775)/52.1775))*((I1[t,]+parmset$rho1*I2[t,]+parmset$rho2*I3[t,]+parmset$rho2*I4[t,]+parmset$seed)%*%beta)/sum(St[t,]))}
 
+  hosp1 <- c(report_infants, report_infants*0.59, report_infants*0.33, report_infants*0.2, report_infants*0.15, report_infants*0.15, rep(report_children, 2), rep(.001, 5))
+  hosp2 <- hosp1 * 0.4
+  hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors)
 
-  hosp = c(rep(hosp_prop[1],3),rep(hosp_prop[2],3),rep(hosp_prop[3],2),rep(hosp_prop[4],4),hosp_prop[5])
-  H1=matrix(0,nrow=t0,ncol=al)#Number of hospitalizations by age
-  for (i in 1:al){
-    H1[,i]=
-      hosp[i]*parmset$RRHm*parmset$sigma3*M0[,i]*lambda1[,i]+
-      hosp[i]*parmset$RRHn*parmset$RRIn*parmset$sigma3*Mn[,i]*lambda1[,i]+
-      hosp[i]*parmset$RRHm*parmset$RRHv*parmset$RRIv*parmset$sigma3*Mv[,i]*lambda1[,i]+
-      hosp[i]*parmset$RRHn*parmset$RRIn*N[,i]*lambda1[,i]+
-      hosp[i]*S0[,i]*lambda1[,i]+
-      hosp[i]*Si[,i]*lambda1[,i]+
-      hosp[i]*parmset$sigma1*S1[,i]*lambda1[,i]+
-      hosp[i]*parmset$sigma2*S2[,i]*lambda1[,i]+
-      hosp[i]*parmset$sigma3*S3[,i]*lambda1[,i]+
-      hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs1[,i]*lambda1[,i]+
-      hosp[i]*parmset$RRIs*parmset$RRHs*parmset$sigma3*Vs2[,i]*lambda1[,i]}
 
+  H1 <- matrix(0, nrow = t0, ncol = al)
+  for (i in 1:al) {
+    H1[, i] <-
+      hosp1[i] * parmset$RRHm * parmset$sigma3 * M0[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$sigma3 * Mn[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$sigma3 * Mv[, i] * lambda1[, i] +
+      hosp1[i] * N[, i] * lambda1[, i] +
+      hosp1[i] * S0[, i] * lambda1[, i] +
+      hosp1[i] * Si[, i] * lambda1[, i] +
+      hosp2[i] * parmset$sigma1 * S1[, i] * lambda1[, i] +
+      hosp3[i] * parmset$sigma2 * S2[, i] * lambda1[, i] +
+      hosp3[i] * parmset$sigma3 * S3[, i] * lambda1[, i] +
+      hosp3[i] * parmset$sigma3 * Vs1[, i] * lambda1[, i] +
+      hosp3[i] * parmset$sigma3 * Vs2[, i] * lambda1[, i]
+  }
 
   H2 = cbind(rowSums(H1[,1:3]),
              rowSums(H1[,4:6]),
@@ -346,7 +379,7 @@ scenario_projection = function(fitted_parms,
 
   H = data.frame(H2)
   H$All = rowSums(H2)
-  age_list = c("<6m","5-11m","1-4yrs","5-59yrs","60+yrs","All")
+  age_list = c("<6m","5-11m","1-4yrs","5-64yrs","65+yrs","All")
   names(H)=age_list
   H$date = dates$new_date
   results = H %>% filter(date>=projection_start) %>%
@@ -355,7 +388,7 @@ scenario_projection = function(fitted_parms,
   totals = results %>% select(-"date", -"scenario")
   totals=data.frame(total = colSums(totals)) %>%
     mutate(age = age_list,
-           age=factor(.data$age,levels=c("<6m","6-11m","1-4yrs","5-59yrs","60+yrs","All")))
+           age=factor(.data$age,levels=c("<6m","6-11m","1-4yrs","5-64yrs","65+yrs","All")))
 
   plot1 = ggplot(data=H)+
     theme_bw()+

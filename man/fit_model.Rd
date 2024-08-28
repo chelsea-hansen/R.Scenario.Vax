@@ -7,9 +7,9 @@
 fit_model(time_series, age_dist, parmset, yinit, yinit.vector)
 }
 \arguments{
-\item{time_series}{An RSV hospitalization/ED visit time series}
+\item{time_series}{An RSV hospitalization time series. Make sure this is rounded to whole numbers.}
 
-\item{age_dist}{The proportion of RSV hospitalizations in each age group (age groups include: <6 months,6-11 months,1-4 years,5-59 years, 60+ years)}
+\item{age_dist}{The proportion of RSV hospitalizations in each age group (age groups include: <6 months,6-11 months,1-4 years,5-64 years, 65+ years)}
 
 \item{parmset}{A list of fixed parameters (retrieved in the get_data function)}
 
@@ -28,7 +28,7 @@ dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
 parmset=dat[[1]]
 yinit=dat[[2]]
 yinit.vector=dat[[3]]
-weekly_rsv = round(timeseries[which(timeseries$state=="CA"),"value"])
-fitLL = fit_model(time_series = weekly_rsv, age_dist = c(.19,.11,.15,.25,.30),
+weekly_rsv = round(timeseries[which(timeseries$state=="California"),"value"])
+fitLL = fit_model(time_series = weekly_rsv$value, age_dist = c(.19,.11,.15,.25,.30),
 parmset=parmset,yinit=yinit,yinit.vector=yinit.vector)
 }
