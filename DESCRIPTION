@@ -11,7 +11,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs, cdcfluview, cowplot, pracma, tidyr
 ImportsFrom: utils tail head stats dpois optim median quantile pracma sigmoid tidyr pivot_longer
-URL: https://github.com/chelsea-hansen/R.Scenario.Vax
+URL: https://github.com/chelsea-hansen/R.Scenario.Vax, https://chelsea-hansen.github.io/R.Scenario.Vax/
 BugReports: https://github.com/chelsea-hansen/R.Scenario.Vax/issues
 Suggests: 
     testthat (>= 3.0.0)
