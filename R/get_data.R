@@ -62,6 +62,7 @@ pop = tidycensus::get_estimates(
     product = "characteristics",
     breakdown = c("AGEGROUP"),
     breakdown_labels = TRUE,
+    vintage=2022,
     state = state_abbr,
     county = county_name)%>%
     select("AGEGROUP","value")
