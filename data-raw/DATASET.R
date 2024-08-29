@@ -1,7 +1,7 @@
 ## code to prepare `DATASET` dataset goes here
 #rm(list=ls())
 library(lubridate)
-library(cdcfluview)
+#library(cdcfluview)
 library(imputeTS)
 library(tidyverse)
 library(lubridate)
@@ -16,7 +16,7 @@ dat = read.csv("data-raw/Weekly_Rates_of_Laboratory-Confirmed_RSV_Hospitalizatio
          Age.Category %in% c("0-<6 months","6mo-<12 months","1-4 years","5-17 years","18-49 years","50-64 years","65+ years")) %>%
   mutate(Age.Category = ifelse(Age.Category=="0-<6 months","<6m",
                                ifelse(Age.Category=="6mo-<12 months","6-11m",Age.Category)),
-         mmwr_week(Week.ending.date),
+         mmwr_week=epiweek(Week.ending.date),
          date= as.Date(Week.ending.date)) %>%
   select(-Sex,-Race,-Cumulative.Rate,-Type) %>%
   filter(!is.na(Rate))
@@ -179,7 +179,8 @@ dist_overall = dat2 %>%
 
 
 dist_by_time = dat2 %>%
-  mutate(mmwr_week(date),
+  mutate(mmwr_week=epiweek(date),
+         mmwr_year = year(date),
          season = ifelse(mmwr_week>=40, paste0(mmwr_year,"-",mmwr_year+1),paste0(mmwr_year-1,"-",mmwr_year))) %>%
   filter(season %notin% c("2016-2017","2017-2018")) %>%
   mutate(period = ifelse(season %in% c("2018-2019","2019-2020"),"pre-pandemic",
@@ -215,9 +216,9 @@ timeseries = dat2 %>%
   select("state"=State,date,"value"=smooth)
 
 
-ggplot(dat3)+
-  geom_line(aes(x=date,y=value))+
-  facet_grid(rows=vars(State),scales="free")
+#ggplot(dat3)+
+  #geom_line(aes(x=date,y=value))+
+  #facet_grid(rows=vars(State),scales="free")
 
 usethis::use_data(timeseries, overwrite = TRUE)
 usethis::use_data(age_distribution, overwrite = TRUE)
