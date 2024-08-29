@@ -1,0 +1,49 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  warning=FALSE,
+  message=FALSE
+)
+```
+
+# R.Scenario.Vax
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of R.Scenario.Vax is to fit a deterministic, compartmental transmission model to RSV hospitalization data and provide scenario projections for the number of hospitalizations averted due to new immunization products. 
+
+## Installation
+
+You can install the development version of R.Scenario.Vax from [GitHub](https://github.com/) with:
+
+
+``` r
+# install.packages("devtools")
+remotes::install_github("chelsea-hansen/R.Scenario.Vax")
+```
+
+## Example
+
+This is a basic example of how to prepare the population dynamics data and initial values for compartments for New York state:
+
+```{r example}
+library(R.Scenario.Vax)
+
+
+ny_data = get_data(state_or_county="state",state_abbr="NY",county_name=NULL)
+
+#Parameter Values 
+print(ny_data[[1]])
+
+```
+
