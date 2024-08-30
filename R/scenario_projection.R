@@ -30,8 +30,8 @@
 #' @import deSolve
 #' @import magrittr
 #' @import dplyr
+#' @import MMWRweek
 #' @import ggplot2
-#' @import cdcfluview
 #' @import cowplot
 #' @importFrom pracma sigmoid
 #' @importFrom stats median quantile
@@ -91,8 +91,8 @@ scenario_projection = function(fitted_parms,
 
 
   dates = data.frame(dates=seq(from=as.Date(data_start), to=as.Date(projection_end), by="weeks")) %>%
-    mutate(mmwr_week(dates),
-           new_date=mmwr_week_to_date(week=.data$mmwr_week,year=.data$mmwr_year)) %>%
+    mutate(MMWRweek(dates),
+           new_date=MMWRweek2Date(MMWRweek=.data$MMWRweek,MMWRyear=.data$MMWRyear)) %>%
     select("new_date")
 
   fit_times = seq(1, nrow(dates)+52, by=1)
