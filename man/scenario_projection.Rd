@@ -12,10 +12,12 @@ scenario_projection(
   data_start,
   projection_start,
   projection_end,
-  senior_start,
-  senior_end,
-  senior_doses,
-  senior_doses_last_year,
+  adult_start,
+  adult_end,
+  adult75_doses,
+  adult75_doses_last_year,
+  adult65_74_doses,
+  adult65_74_doses_last_year,
   maternal_start,
   maternal_end,
   maternal_doses,
@@ -44,13 +46,17 @@ scenario_projection(
 
 \item{projection_end}{The user defined end date of the projection period}
 
-\item{senior_start}{The start date of senior vaccination for the projection period}
+\item{adult_start}{The start date of senior vaccination for the projection period}
 
-\item{senior_end}{The end date of senior vaccination for the projection period}
+\item{adult_end}{The end date of senior vaccination for the projection period}
 
-\item{senior_doses}{The number of vaccine doses administered to seniors during the period of vaccine administration}
+\item{adult75_doses}{The number of vaccine doses administered to adults 75+ during the period of vaccine administration}
 
-\item{senior_doses_last_year}{The number of vaccine doses administered to seniors in the previous season}
+\item{adult75_doses_last_year}{The number of vaccine doses administered to adults 75+ in the previous season}
+
+\item{adult65_74_doses}{The number of vaccine doses administered to adults 65-74 during the period of vaccine administration}
+
+\item{adult65_74_doses_last_year}{The number of vaccine doses administered to adults 65-74 in the previous season}
 
 \item{maternal_start}{The start date of the maternal vaccination for the projection period}
 
@@ -92,10 +98,12 @@ scenario_a = scenario_projection(fitted_parms=fitLL,
                             data_start = '2017-07-08',
                             projection_start = '2024-10-01',
                             projection_end = '2025-06-01',
-                            senior_start = '2024-08-01',
-                            senior_end = '2025-05-01',
-                            senior_doses = 100000,
-                            senior_doses_last_year=250000,
+                            adult_start = '2024-08-01',
+                            adult_end = '2025-05-01',
+                            adult75_doses = 100000,
+                            adult75_doses_last_year=250000,
+                            adult65_74_doses = 100000,
+                            adult65_74_doses_last_year=250000,
                             maternal_start = '2024-09-01',
                             maternal_end = '2025-04-01',
                             maternal_doses = 50000,

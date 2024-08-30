@@ -7,16 +7,17 @@
 \format{
 \subsection{\code{fitLL}}{
 
-A list with 8 items:
+A list with 9 items:
 \describe{
 \item{list item 1}{a numeric value representing the fitted baseline transmission rate}
 \item{list item 2}{a numeric value representing the fitted amplitude of seasonal forcing}
 \item{list item 3}{a numeric value representing the fitted phase of seasonal forcing}
-\item{list item 4}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in adults 65+}
-\item{list item 5}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in infants <2 months}
-\item{list item 6}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in children 1-4 years}
-\item{list item 7}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in ages 5-64 years}
-\item{list item 8}{a matix with 3 columns and 100 rows representing the parameters values (baseline transmission, amplitude, phase) resampled using latin hypercube sampling}
+\item{list item 4}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in infants <2 months}
+\item{list item 5}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in children 1-4 years}
+\item{list item 6}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in ages 5-64 years}
+\item{list item 7}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in adults 65 - 74 years}
+\item{list item 8}{a numeric value representing the fitted value for the proportion of RSV infections leading to reported hospitalizations in ages 75+ years}
+\item{list item 9}{a matix with 3 columns and 100 rows representing the parameters values (baseline transmission, amplitude, phase) resampled using latin hypercube sampling}
 ...
 }
 }

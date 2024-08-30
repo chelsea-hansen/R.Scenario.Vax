@@ -87,7 +87,7 @@ fitNY = fit_model(time_series = timeseries_ny$value,
                   yinit.vector = yinit.vector)
 ```
 
-<img src="man/figures/README-step two-1.png" width="100%" />
+<img src="man/figures/README-steptwo-1.png" width="100%" />
 
 ### Step 3: Scenario Projections
 
@@ -123,4 +123,4 @@ scenarioA = scenario_projection(fitted_parms  = fitNY,
 )
 ```
 
-<img src="man/figures/README-step three-1.png" width="100%" />
+<img src="man/figures/README-stepthree-1.png" width="100%" />

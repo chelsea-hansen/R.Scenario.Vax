@@ -54,7 +54,8 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
   RRIv=parms$RRIv
 
   #parameters for seniors
-  V_s=parms$senior_vax[times]
+  V_s65=parms$senior_vax_65_74[times]
+  V_s75=parms$senior_vax_75[times]
   waningS=1/(parms$waningS/2/length.step) #duration of protection from vaccination (divided by 2 because 2 compartments)
   RRIs=parms$RRIs #relative risk of infection for vaccinated seniors
 
@@ -122,21 +123,21 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
   Aging.Prop <- c(0,mu[1:(N.ages-1)])
 
 
-  dy[,'M0'] <- period.birth.rate - c(birth_V,rep(0,12)) - #c(birth_n,rep(0,12)) -
-    c(mono_01,mono_23,rep(0,11))-
+  dy[,'M0'] <- period.birth.rate - c(birth_V,rep(0,13)) -
+    c(mono_01,mono_23,rep(0,12))-
     parms$sigma3*lambda*M0 -
     omega*M0-
     (mu+um)*M0 +
     Aging.Prop*c(0,M0[1:(N.ages-1)])
 
   # newborns who receive monoclonals
-  dy[,'Mn'] <- c(mono_01,mono_23,rep(0,11))- #c(birth_N,rep(0,12)) +
+  dy[,'Mn'] <- c(mono_01,mono_23,rep(0,12))-
     RRIn*parms$sigma3*lambda*Mn -
     waningN*Mn-
     (mu+um)*Mn +
     Aging.Prop*c(0,Mn[1:(N.ages-1)]) #aging in
 
-  dy[,'Mv'] <- c(birth_V,rep(0,12)) -
+  dy[,'Mv'] <- c(birth_V,rep(0,13)) -
     RRIn*parms$sigma3*lambda*Mv -
     waningV*Mv-
     (mu+um)*Mv +
@@ -144,7 +145,7 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
 
   # infants <8 months who did not receive nirsevimab at birth but receive a catch-up dose ahead of the season
   # these infants can be in the M0 or S0 compartments
-  dy[,'N'] <- c(0,0,mono_45,mono_67,rep(0,9)) - #from both M0 and S0 compartments
+  dy[,'N'] <- c(0,0,mono_45,mono_67,rep(0,10)) - #from both M0 and S0 compartments
     RRIn*lambda*N -
     waningN*N-
     (mu + um)*N +
@@ -157,7 +158,7 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
     Aging.Prop*c(0,Si[1:(N.ages-1)])
 
   dy[,'S0'] <- omega*M0 -
-    c(0,0,mono_45,mono_67,rep(0,9)) -
+    c(0,0,mono_45,mono_67,rep(0,10)) -
     lambda*S0 -
     (mu + um)*S0 +
     Aging.Prop*c(0,S0[1:(N.ages-1)])
@@ -204,14 +205,14 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
     Aging.Prop*c(0,R3[1:(N.ages-1)])
 
   dy[,'S3'] <- waning3*R3 + waning4*R4  + waningS*Vs2-
-    c(rep(0,12),V_s)-
+    c(rep(0,12),V_s65,V_s75)-
     parms$sigma3*lambda*S3 -
     (mu + um)*S3 +
     Aging.Prop*c(0,S3[1:(N.ages-1)])
 
 
   #make a vaccination compartment for the >65
-  dy[,'Vs1'] <- c(rep(0,12),V_s) -
+  dy[,'Vs1'] <- c(rep(0,12),V_s65,V_s75) -
     RRIs*parms$sigma3*lambda*Vs1 -
     waningS*Vs1  -
     (mu + um)*Vs1 +

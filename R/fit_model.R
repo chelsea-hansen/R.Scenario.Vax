@@ -22,35 +22,32 @@
 #' yinit=dat[[2]]
 #' yinit.vector=dat[[3]]
 #' weekly_rsv = round(timeseries[which(timeseries$state=="California"),"value"])
-#' fitLL = fit_model(time_series = weekly_rsv$value, age_dist = c(.19,.11,.15,.25,.30),
+#' fitLL = fit_model(time_series = weekly_rsv$value, age_dist = c(.19,.08,.23,.17,.10,.23),
 #' parmset=parmset,yinit=yinit,yinit.vector=yinit.vector)
 
 fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
   fit_times = seq(1,length(time_series)+104,by=1)
- # parmset$monoclonal_birth = rep(0,length(time_series)+104)
- # parmset$monoclonal_catchup = rep(0,length(time_series)+104)
   parmset$monoclonal_01 = rep(0,length(time_series)+104)
   parmset$monoclonal_23 = rep(0,length(time_series)+104)
   parmset$monoclonal_45 = rep(0,length(time_series)+104)
   parmset$monoclonal_67 = rep(0,length(time_series)+104)
   parmset$maternal_vax = rep(0,length(time_series)+104)
-  parmset$senior_vax = rep(0,length(time_series)+104)
+  parmset$senior_vax_65_74 = rep(0,length(time_series)+104)
+  parmset$senior_vax_75 = rep(0,length(time_series)+104)
 
   fitmodel <-  function(parameters,dat) {
     protrans <- parameters[1] # parameter for baseline transmission rate
-    #baseline.txn.rate = exp(protrans)
     baseline.txn.rate = 7+(8*(exp(protrans))) / (1+exp(protrans))
     amp <- parameters[2] # parameter for seasonal amplitude
-   # b1 <-   exp(amp)
     b1 <-  .08+(.35*(exp(amp))) / (1+exp(amp))
     trans <- parameters[3] # parameter for seasonal phase
     phi <-  (2*pi*(exp(trans))) / (1+exp(trans)) # transform to between 0 and 2pi
-   # reporting_rate = 1/(1+exp(-parameters[4])) #reporting rate = how many infections are reported as hospitalizations in the data
-    report_seniors <- 1 / (1 + exp(-parameters[4]))
-    report_infants <- 1 / (1 + exp(-parameters[5]))
-    report_children <- 1 / (1 + exp(-parameters[6]))
-    report_adults <- 1 / (1 + exp(-parameters[7]))
+    report_infants <- 1 / (1 + exp(-parameters[4]))
+    report_children <- 1 / (1 + exp(-parameters[5]))
+    report_adults <- 1 / (1 + exp(-parameters[6]))
+    report_seniors65 <- 1 / (1 + exp(-parameters[7]))
+    report_seniors75 <- 1 / (1 + exp(-parameters[8]))
 
 
     # Simulate the model with initial conditions and timesteps defined above, and parameter values from function call
@@ -84,14 +81,13 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
     beta <-  baseline.txn.rate/(parmset$dur.days1/7)/(sum(yinit)^(1-parmset$q))*parmset$c2# q depends on transmission type (whether depends on population density or not); c2 is the contact matrix
 
-    lambda1=matrix(0,nrow=t0,ncol=13)#Force of infection
+    lambda1=matrix(0,nrow=t0,ncol=al)#Force of infection
     for (t in 1:t0){
       lambda1[t,] <- as.vector((1+b1*cos(2*pi*(t-phi*52.1775)/52.1775))*((I1[t,]+parmset$rho1*I2[t,]+parmset$rho2*I3[t,]+parmset$rho2*I4[t,]+parmset$seed)%*%beta)/sum(St[t,]))}
 
-    hosp1 <- c(report_infants, report_infants*0.59, report_infants*0.33, report_infants*0.2, report_infants*0.15, report_infants*0.15, rep(report_children, 2), rep(.001, 5))
+    hosp1 <- c(report_infants, report_infants*0.59, report_infants*0.33, report_infants*0.2, report_infants*0.15, report_infants*0.15, rep(report_children, 2), rep(.001, 6))
     hosp2 <- hosp1 * 0.4
-    hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors)
-
+    hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors65, report_seniors75)
 
     H1 <- matrix(0, nrow = t0, ncol = al)
     for (i in 1:al) {
@@ -111,7 +107,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
     H <- rowSums(H1)
 
-    H2 <- cbind(rowSums(H1[, 1:3]), rowSums(H1[, 4:6]), rowSums(H1[, 7:8]), rowSums(H1[, 9:12]), H1[, 13])
+    H2 <- cbind(rowSums(H1[, 1:3]), rowSums(H1[, 4:6]), rowSums(H1[, 7:8]), rowSums(H1[, 9:12]), H1[, 13],H1[,14])
     age_dist2 <- colSums(H2)
 
 
@@ -153,7 +149,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
   # Run optimization function  --------------------------------------
 
-  fitLL <- optim(par = c(-2.2,-2,2,-5,-2,-4,-8),
+  fitLL <- optim(par = c(-2.2,-2,2,-2,-4,-8,-5,-5),
                 # lower = c(2,-2.4,1.5,-10,-10,-10,-10),
                 # upper = c(3,-1.2,2.5,2,-2,-2,-2),
                  fn = fitmodel,        # the distance function to optimize
@@ -166,23 +162,16 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   baseline.txn.rate = 7+(8*(exp(fitLL$par[1]))) / (1+exp(fitLL$par[1]))
   b1 <-  .08+(.35*(exp(fitLL$par[2]))) / (1+exp(fitLL$par[2]))
   phi=(2*pi*(exp(fitLL$par[3]))) / (1+exp(fitLL$par[3]))
-  #reporting_rate = 1/(1+exp(-fitLL$par[4]))
-  report_seniors <- 1 / (1 + exp(-fitLL$par[4]))
-  report_infants <- 1 / (1 + exp(-fitLL$par[5]))
-  report_children <- 1 / (1 + exp(-fitLL$par[6]))
-  report_adults <- 1 / (1 + exp(-fitLL$par[7]))
+  report_infants <- 1 / (1 + exp(-fitLL$par[4]))
+  report_children <- 1 / (1 + exp(-fitLL$par[5]))
+  report_adults <- 1 / (1 + exp(-fitLL$par[6]))
+  report_seniors65 <- 1 / (1 + exp(-fitLL$par[7]))
+  report_seniors75 <- 1 / (1 + exp(-fitLL$par[8]))
+
 
   set.seed(123)
   h=100
   lhs<-maximinLHS(h,3)
-
-  #  beta=fitLL$par[1]
-  #  beta_lower = fitLL$par[1] - abs(fitLL$par[1]*.5)
-  #  beta_upper = fitLL$par[1] + abs(fitLL$par[1]*.5)
-  #  b1_lower = fitLL$par[2] - abs(fitLL$par[2]*.5)
-  #  b1_upper = fitLL$par[2] + abs(fitLL$par[2]*.5)
-  # phi_lower = fitLL$par[3] - abs(fitLL$par[3]*.5)
-  #  phi_upper = fitLL$par[3] + abs(fitLL$par[3]*.5)
 
   beta_lower = baseline.txn.rate*.95
   beta_upper = baseline.txn.rate*1.05
@@ -195,13 +184,6 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
     beta = lhs[,1]*(beta_upper-beta_lower)+beta_lower,
     b1 = lhs[,2]*(b1_upper-b1_lower)+b1_lower,
     phi = lhs[,3]*(phi_upper-phi_lower)+phi_lower)
-
-
-  #transform amplitude and phase
-  # lhs_parms[,"beta"]= 6+(3*(exp(lhs_parms[,"beta"]))) / (1+exp(lhs_parms[,"beta"]))
-  # lhs_parms[,"b1"] = .05+(.5*(exp(lhs_parms[,"b1"]))) / (1+exp(lhs_parms[,"b1"]))
-  # lhs_parms[,"phi"] = (2*pi*(exp(lhs_parms[,"phi"]))) / (1+exp(lhs_parms[,"phi"]))
-
 
 
   # Plot results with fit parameters   ---------------------------------------------
@@ -244,44 +226,10 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   for (t in 1:t0){
     lambda1[t,] <- as.vector((1+b1*cos(2*pi*(t-phi*52.1775)/52.1775))*((I1[t,]+parmset$rho1*I2[t,]+parmset$rho2*I3[t,]+parmset$rho2*I4[t,]+parmset$seed)%*%beta)/sum(St[t,]))}
 
-  #H1=matrix(0,nrow=t0,ncol=al)#Number of hospitalizations by age
- # for (i in 1:al){
- #   H1[,i]=
- #     parmset$RRHm*parmset$sigma3*M0[,i]*lambda1[,i]+
-  #    parmset$RRIn*parmset$sigma3*Mn[,i]*lambda1[,i]+
-  #    parmset$RRIv*parmset$sigma3*Mv[,i]*lambda1[,i]+
-   #   parmset$RRIn*N[,i]*lambda1[,i]+
-  #    S0[,i]*lambda1[,i]+
-  #    Si[,i]*lambda1[,i]+
-  #    parmset$sigma1*S1[,i]*lambda1[,i]+
-  #    parmset$sigma2*S2[,i]*lambda1[,i]+
-  #    parmset$sigma3*S3[,i]*lambda1[,i]+
-  #    parmset$RRIs*parmset$sigma3*Vs1[,i]*lambda1[,i]+
-  #    parmset$RRIs*parmset$sigma3*Vs2[,i]*lambda1[,i]}
 
- # H2 = rowSums(H1)*reporting_rate
- # H2.1= H2*age_dist[1]
- # H2.2= H2*age_dist[2]
-#  H2.3= H2*age_dist[3]
-#  H2.4= H2*age_dist[4]
-#  H2.5= H2*age_dist[5]
-
- # H3 = cbind(rowSums(H1[,1:3]),
-           #  rowSums(H1[,4:6]),
-           #  rowSums(H1[,7:8]),
-           #  rowSums(H1[,9:12]),
-           #  H1[,13])
-
-  #H3.1 = sum(H2.1)/sum(H3[,1])
-  #H3.2 = sum(H2.2)/sum(H3[,2])
-  #H3.3 = sum(H2.3)/sum(H3[,3])
-  #H3.4 = sum(H2.4)/sum(H3[,4])
-  #H3.5 = sum(H2.5)/sum(H3[,5])
-
-  #hosp_props = c(H3.1,H3.2,H3.3,H3.4,H3.5)
-  hosp1 <- c(report_infants, report_infants*0.59, report_infants*0.33, report_infants*0.2, report_infants*0.15, report_infants*0.15, rep(report_children, 2), rep(.001, 5))
+  hosp1 <- c(report_infants, report_infants*0.59, report_infants*0.33, report_infants*0.2, report_infants*0.15, report_infants*0.15, rep(report_children, 2), rep(.001, 6))
   hosp2 <- hosp1 * 0.4
-  hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors)
+  hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors65, report_seniors75)
 
 
   H1 <- matrix(0, nrow = t0, ncol = al)
@@ -301,7 +249,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   }
 
   H2 <- rowSums(H1)
-  prop2 <- cbind(rowSums(H1[, 1:3]), rowSums(H1[, 4:6]), rowSums(H1[, 7:8]), rowSums(H1[, 9:12]), H1[, 13])
+  prop2 <- cbind(rowSums(H1[, 1:3]), rowSums(H1[, 4:6]), rowSums(H1[, 7:8]), rowSums(H1[, 9:12]), H1[, 13],H1[, 14])
   age_dist2 <- colSums(prop2)/sum(prop2)
 
 
@@ -313,10 +261,12 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
     scale_color_manual(name=NULL,values=c("maroon4"))+
     labs(x=NULL, y="RSV Hospitalizations")
 
+  ages = c("<6m","6-11m","1-4yrs","5-64yrs","65-74yrs","75+yrs")
+  ages_order = factor(ages, levels=ages,order=TRUE)
   plot2 = ggplot2::ggplot()+
     theme_bw()+
-    geom_bar(aes(x=1:5,y=age_dist,fill="Data"),stat="identity")+
-    geom_point(aes(x=1:5,y=age_dist2,color="Model"),size=5)+
+    geom_bar(aes(x=ages_order,y=age_dist,fill="Data"),stat="identity")+
+    geom_point(aes(x=ages_order,y=age_dist2,color="Model"),size=5)+
     scale_fill_manual(name=NULL,values=c("steelblue3"))+
     scale_color_manual(name=NULL,values=c("maroon4"))+
     labs(x=NULL, y="Age Distribution")
@@ -325,7 +275,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   print(plot)
 
  # fitted_parms = list(baseline.txn.rate,b1,phi,reporting_rate, hosp_props, lhs_parms)
-  fitted_parms = list(baseline.txn.rate,b1,phi,report_seniors,report_infants, report_children, report_adults, lhs_parms)
+  fitted_parms = list(baseline.txn.rate,b1,phi,report_infants, report_children, report_adults, report_seniors65,report_seniors75,lhs_parms)
 
   return(fitted_parms)
 

@@ -29,6 +29,6 @@ parmset=dat[[1]]
 yinit=dat[[2]]
 yinit.vector=dat[[3]]
 weekly_rsv = round(timeseries[which(timeseries$state=="California"),"value"])
-fitLL = fit_model(time_series = weekly_rsv$value, age_dist = c(.19,.11,.15,.25,.30),
+fitLL = fit_model(time_series = weekly_rsv$value, age_dist = c(.19,.08,.23,.17,.10,.23),
 parmset=parmset,yinit=yinit,yinit.vector=yinit.vector)
 }

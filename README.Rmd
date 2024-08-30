@@ -78,7 +78,7 @@ The `get_data` function will retrieve the fixed parameter values as well as the 
 3. Vectorized version of 2 from above
 
 
-```{r step one}
+```{r stepone}
 library(R.Scenario.Vax)
 
 ny_data = get_data(state_or_county="state",state_abbr="NY",county_name=NULL)
@@ -92,7 +92,7 @@ yinit.vector = ny_data[[3]]
 
 the `fit_model` function will find the best fit parameters using maximum likelihood estimation. The model will fit 7 parameters in total. But first we will extract the data for New York from the sample data sets. We also only want to fit to data before the COVID-19 pandemic. The function will produce a figure when the fitting is complete showing the fit to the timeseries and age distribution data. 
 
-```{r step two}
+```{r steptwo}
 
 timeseries_ny = timeseries %>% filter(state=="New York",date<'2020-04-01')
 age_distribution_ny = age_distribution %>% filter(state=="New York")
@@ -109,7 +109,7 @@ fitNY = fit_model(time_series = timeseries_ny$value,
 
 Once you have the fitted parameters use the `scenario_projection` function to run scenario projections for the number of RSV hospitalizations based on the number of immunizations administered. We are only running one example here, but you can run many scenarios 
 
-```{r step three}
+```{r stepthree}
 
 scenarioA = scenario_projection(fitted_parms  = fitNY,
                                 parmset = fixed_parameters,
