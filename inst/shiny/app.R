@@ -181,7 +181,7 @@ server <- function(input, output, session) {
             legend.title = element_text(size = 20),
             title = element_text(size = 20)) +
       labs(x = "% Difference", y = NULL, color = "Scenario",
-           title = "Difference from COunterfactual")
+           title = "Difference from Counterfactual")
   })
 
 

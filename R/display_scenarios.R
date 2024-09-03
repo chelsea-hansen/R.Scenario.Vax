@@ -1,8 +1,8 @@
-#' Launch Shiny App to display scenario projections
+#' Launch Shiny App to display scenario projections (function)
 #'
 #' This function launches the Shiny App included in the package.
 #' The Shiny App allows users to upload the saved results from the package functions and display scenario projections.
-#' In order for the Shiny App to work, make sure that one of the scenarios is called "Counterfactual"
+#' In order for the Shiny App to work, make sure that one of the scenarios is called "Counterfactual" and that projection_intervals = TRUE
 #' @export
 display_scenarios <- function() {
   app_dir <- system.file("shiny", package = "R.Scenario.Vax")
