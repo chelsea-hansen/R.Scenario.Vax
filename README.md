@@ -24,7 +24,7 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 ## Model Diagram
 
 <figure>
-<img src="inst/images/model_diagram.png" alt="Model Diagram" />
+<img src="man/figures/model_diagram.png" alt="Model Diagram" />
 <figcaption aria-hidden="true">Model Diagram</figcaption>
 </figure>
 

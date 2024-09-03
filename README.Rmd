@@ -33,7 +33,7 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 
 ## Model Diagram
 
-![Model Diagram](inst/images/model_diagram.png)
+![Model Diagram](man/figures/model_diagram.png)
 
 ## Fixed Model Parameters
 
