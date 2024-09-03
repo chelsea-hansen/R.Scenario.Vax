@@ -3,29 +3,31 @@
 \docType{data}
 \name{timeseries}
 \alias{timeseries}
-\title{Time series of RSV hospitalizations}
+\title{Time series of RSV hospitalizations (data frame)}
 \format{
 \subsection{\code{timeseries}}{
 
-A data frame with 4,053 rows and 3 columns:
+A data frame with 1274 rows and 3 columns:
 \describe{
 \item{date}{MMWR week}
-\item{state}{state name}
+\item{state}{state name (California, Georgia, Maryland, Minnesota, New York, Tennessee, Oregon)}
 \item{value}{estimated number of RSV hospitalizations}
 ...
 }
 }
 }
 \source{
-\url{https://data.cdc.gov/Public-Health-Surveillance/Rates-of-Laboratory-Confirmed-RSV-COVID-19-and-Flu/kvib-3txy/about_data}
+\url{https://data.cdc.gov/Public-Health-Surveillance/Weekly-Rates-of-Laboratory-Confirmed-RSV-Hospitali/29hc-w46k/about_data}
 }
 \usage{
 timeseries
 }
 \description{
-Weekly RSV hospitalizations for 12 states participating in RSVNet
-Data from May 2020 through April 2021 have been removed.
-Date for data prior to May 2020 have been increased by 1 year to create a continuous dataset
-Ex: (May1,2020  = May1,2021)
+Weekly RSV hospitalizations (all ages).
+Data is available for the 7 states that began participation in RSV-Net in 2016.
+RSV-Net provides data on RSV hospitalization rates.
+We have converted these to an approximate number of hospitalizations for use in the model.
+RSV-Net did not include data for children until 2018.
+Simulated data for children has been added based on the weekly average RSV hospitalization rate during the 2018-19 and 2019-20 RSV seasons.
 }
 \keyword{datasets}

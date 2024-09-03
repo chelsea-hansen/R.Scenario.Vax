@@ -2,12 +2,12 @@
 % Please edit documentation in R/get_data.R
 \name{get_data}
 \alias{get_data}
-\title{Download and format data for RSV dynamic transmission model}
+\title{Download and format data for RSV dynamic transmission model (function)}
 \usage{
 get_data(state_or_county, state_abbr, county_name)
 }
 \arguments{
-\item{state_or_county}{describe if you are modeling for a "state" or a "county"}
+\item{state_or_county}{describe if you are modeling a "state" or a "county"}
 
 \item{state_abbr}{The two letter state abbreviation (you need this even if you are modeling a county)}
 
@@ -17,7 +17,8 @@ get_data(state_or_county, state_abbr, county_name)
 a list of values
 }
 \description{
-Download and format data for RSV dynamic transmission model
+Download and format data for RSV dynamic transmission model (function).
+The function returns a list of 3 items. These will be used in the fit_model() function
 }
 \examples{
 data_california = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)

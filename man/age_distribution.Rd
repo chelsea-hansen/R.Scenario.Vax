@@ -3,26 +3,27 @@
 \docType{data}
 \name{age_distribution}
 \alias{age_distribution}
-\title{Age distribution of RSV hospitalizations}
+\title{Age distribution of RSV hospitalizations (data frame)}
 \format{
 \subsection{\code{age_distribution}}{
 
-A data frame with 55 rows and 3 columns:
+A data frame with 42 rows and 3 columns:
 \describe{
-\item{state}{state name}
-\item{age_group}{age group (<6 months, 6-11 months, 1-4 years, 5-64 years, 65+ years)}
-\item{proportion}{proportion of all hospitalizations during the 2018-2019 and 2029-2020 seasons}
+\item{state}{state name (California, Georgia, Maryland, Minnesota, New York, Tennessee, Oregon)}
+\item{age_group}{age group (<6 months, 6-11 months, 1-4 years, 5-64 years, 65-74 years, 75+ years)}
+\item{proportion}{proportion of RSV hospitalizations during the 2018-2019 and 2029-2020 seasons}
 ...
 }
 }
 }
 \source{
-\url{https://data.cdc.gov/Public-Health-Surveillance/Rates-of-Laboratory-Confirmed-RSV-COVID-19-and-Flu/kvib-3txy/about_data}
+\url{https://data.cdc.gov/Public-Health-Surveillance/Weekly-Rates-of-Laboratory-Confirmed-RSV-Hospitali/29hc-w46k/about_data}
 }
 \usage{
 age_distribution
 }
 \description{
-Age distribution of RSV hospitalizations for 12 states participating in RSVNet
+A data frame showing the age distribution of RSV hospitalizations.
+Data is available for the 7 states that began participation in RSV-Net in 2016.
 }
 \keyword{datasets}

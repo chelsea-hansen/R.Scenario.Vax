@@ -1,20 +1,27 @@
-#' MSIRS dynamic transmission model for RSV
+#' MSIRS dynamic transmission model for RSV (function)
 #'
-#' @param times A numeric vector of times
-#' @param y A vector of starting values for model compartments
-#' @param parms A list of fixed parameter values
+#' This function fits the equations which dictate the flow of individuals between compartments.
+#' This function is used in the fit_model() and scenario_projection() functions, but does not need to be used directly by the package user.
+#'
+#' @param times A numeric vector of times.
+#' @param y A vector of starting values for each model compartment.
+#' @param parms A list of fixed parameter values.
 #'
 #' @return A matrix of values.
 #' @export
-#'
+#' @import deSolve
 #' @examples
 #'
 
 #' dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
-#' parmset=dat[[1]]
+#' parmset=dat[[1]] #fixed parameters
 #' yinit.vector=dat[[3]]
+#'
+#' #time steps
 #' fit_times = seq(1,100,by=1)
-#' parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)
+#'
+#' parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)#add the fitted parameters
+#'
 #' results <- MSIRS_immunization_dynamics(times=fit_times, y=yinit.vector,parms=parms)
 
 MSIRS_immunization_dynamics <- function(times,y,parms){

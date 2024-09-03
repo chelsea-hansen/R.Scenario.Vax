@@ -1,6 +1,9 @@
-#' Download and format data for RSV dynamic transmission model
+#' Download and format data for RSV dynamic transmission model (function)
 #'
-#' @param state_or_county describe if you are modeling for a "state" or a "county"
+#' Download and format data for RSV dynamic transmission model (function).
+#' The function returns a list of 3 items. These will be used in the fit_model() function
+#'
+#' @param state_or_county describe if you are modeling a "state" or a "county"
 #' @param state_abbr The two letter state abbreviation (you need this even if you are modeling a county)
 #' @param county_name The name of the county (if modeling a state list NULL here)
 #'

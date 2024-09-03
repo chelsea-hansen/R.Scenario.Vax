@@ -1,10 +1,12 @@
-#' Fit model parameters
+#' Fit model parameters (function)
+#'
+#' This function uses maximum likelihood estimation to fit model parameters. The function uses the optim function from the stats package in R.
 #'
 #' @param time_series An RSV hospitalization time series. Make sure this is rounded to whole numbers.
-#' @param age_dist The proportion of RSV hospitalizations in each age group (age groups include: <6 months,6-11 months,1-4 years,5-64 years, 65+ years)
-#' @param parmset A list of fixed parameters (retrieved in the get_data function)
-#' @param yinit A matrix of compartment initial values (retrieved from get_data function)
-#' @param yinit.vector A vector of compartment initial values (retrieved from get_data function)
+#' @param age_dist The proportion of RSV hospitalizations in each age group (age groups include: <6 months,6-11 months,1-4 years,5-64 years, 65-74 years, 75+ years)
+#' @param parmset A list of fixed parameters (retrieved using the get_data() function)
+#' @param yinit A matrix of initial values for each model compartment(retrieved from get_data() function)
+#' @param yinit.vector A vector of initial values for each model compartment (retrieved from get_data() function)
 #'
 #' @return A list of fitted parameter values. Prints a plot showing the fitted model.
 #' @export
@@ -21,7 +23,9 @@
 #' parmset=dat[[1]]
 #' yinit=dat[[2]]
 #' yinit.vector=dat[[3]]
+#'
 #' weekly_rsv = round(timeseries[which(timeseries$state=="California"),"value"])
+#'
 #' fitLL = fit_model(time_series = weekly_rsv$value, age_dist = c(.19,.08,.23,.17,.10,.23),
 #' parmset=parmset,yinit=yinit,yinit.vector=yinit.vector)
 
@@ -262,7 +266,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
     labs(x=NULL, y="RSV Hospitalizations")
 
   ages = c("<6m","6-11m","1-4yrs","5-64yrs","65-74yrs","75+yrs")
-  ages_order = factor(ages, levels=ages,order=TRUE)
+  ages_order = factor(ages, levels=ages,ordered =TRUE)
   plot2 = ggplot2::ggplot()+
     theme_bw()+
     geom_bar(aes(x=ages_order,y=age_dist,fill="Data"),stat="identity")+

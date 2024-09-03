@@ -2,29 +2,34 @@
 % Please edit documentation in R/MSIRS_immunization_dynamics.R
 \name{MSIRS_immunization_dynamics}
 \alias{MSIRS_immunization_dynamics}
-\title{MSIRS dynamic transmission model for RSV}
+\title{MSIRS dynamic transmission model for RSV (function)}
 \usage{
 MSIRS_immunization_dynamics(times, y, parms)
 }
 \arguments{
-\item{times}{A numeric vector of times}
+\item{times}{A numeric vector of times.}
 
-\item{y}{A vector of starting values for model compartments}
+\item{y}{A vector of starting values for each model compartment.}
 
-\item{parms}{A list of fixed parameter values}
+\item{parms}{A list of fixed parameter values.}
 }
 \value{
 A matrix of values.
 }
 \description{
-MSIRS dynamic transmission model for RSV
+This function fits the equations which dictate the flow of individuals between compartments.
+This function is used in the fit_model() and scenario_projection() functions, but does not need to be used directly by the package user.
 }
 \examples{
 
 dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
-parmset=dat[[1]]
+parmset=dat[[1]] #fixed parameters
 yinit.vector=dat[[3]]
+
+#time steps
 fit_times = seq(1,100,by=1)
-parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)
+
+parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)#add the fitted parameters
+
 results <- MSIRS_immunization_dynamics(times=fit_times, y=yinit.vector,parms=parms)
 }
