@@ -23,9 +23,9 @@ test_that("get_data works correctly", {
 
   # Check that the dimensions of yinit match the expected values
   yinit <- result[[2]]
-  expect_equal(dim(yinit), c(14, 19))
+  expect_equal(dim(yinit), c(14, 22))
 
   # Check that yinit.vector has the correct length
   yinit_vector <- result[[3]]
-  expect_equal(length(yinit_vector), 14 * 19)
+  expect_equal(length(yinit_vector), 14 * 22)
 })

@@ -1,28 +1,3 @@
-#' MSIRS dynamic transmission model for RSV (function)
-#'
-#' This function fits the equations which dictate the flow of individuals between compartments.
-#' This function is used in the fit_model() and scenario_projection() functions, but does not need to be used directly by the package user.
-#'
-#' @param times A numeric vector of times.
-#' @param y A vector of starting values for each model compartment.
-#' @param parms A list of fixed parameter values.
-#'
-#' @return A matrix of values.
-#' @export
-#' @import deSolve
-#' @examples
-#'
-
-#' dat = get_data(state_or_county="state",state_abbr="CA",county_name=NULL)
-#' parmset=dat[[1]] #fixed parameters
-#' yinit.vector=dat[[3]]
-#'
-#' #time steps
-#' fit_times = seq(1,100,by=1)
-#'
-#' parms=c(parmset,baseline.txn.rate=7,b1=.12,phi=3.2)#add the fitted parameters
-#'
-#' results <- MSIRS_immunization_dynamics(times=fit_times, y=yinit.vector,parms=parms)
 
 MSIRS_immunization_dynamics <- function(times,y,parms){
 
@@ -48,21 +23,21 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
   waning4 = 1/(parms$recover3/length.step)
 
   #parameters for monoclonals
-  mono_01 = parms$monoclonal_01[times]
-  mono_23 = parms$monoclonal_23[times]
-  mono_45 = parms$monoclonal_45[times]
-  mono_67 = parms$monoclonal_67[times]
+  birth_N = parms$monoclonal_birth[times]
+  mabs_catchup = parms$monoclonal_catchup[times]
   waningN=1/(parms$waningN/length.step) #duration of nirsevimab protection
+  waningN2=1/(parms$waningN/length.step)
   RRIn=parms$RRIn #relative risk of infection for infants receiving nirsevimab (default is to set to 1)
 
   #parameters for maternal vaccines
   birth_V = parms$maternal_vax[times]#infants born to vaccinated mothers
   waningV=1/(parms$waningV/length.step)#duration of maternal vaccine
+  waningV2 = 1/(parms$waningV2/length.step)
   RRIv=parms$RRIv
 
   #parameters for seniors
-  V_s65=parms$senior_vax_65_74[times]
   V_s75=parms$senior_vax_75[times]
+  V_s65=parms$senior_vax_65_74[times]
   waningS=1/(parms$waningS/2/length.step) #duration of protection from vaccination (divided by 2 because 2 compartments)
   RRIs=parms$RRIs #relative risk of infection for vaccinated seniors
 
@@ -79,9 +54,12 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
 
   #Pull out the states  for the model as vectors
   M0 <-  States[,'M0']
-  Mv <-  States[,'Mv']
-  Mn <-  States[,'Mn'] # newborns who receive monoclonals at birth
-  N <-  States[,'N'] #infants who receive nirsevimab ahead of the season but not at birth
+  Mv1 <-  States[,'Mv1']
+  Mv2 <-  States[,'Mv2']
+  Mn1 <-  States[,'Mn1'] # newborns who receive monoclonals at birth
+  Mn2 <-  States[,'Mn2']
+  N1 <-  States[,'N1'] #infants who receive nirsevimab ahead of the season but not at birth
+  N2 <-  States[,'N2']
 
   Si <-  States[,'Si']
   S0 <-  States[,'S0']
@@ -130,48 +108,66 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
   Aging.Prop <- c(0,mu[1:(N.ages-1)])
 
 
-  dy[,'M0'] <- period.birth.rate - c(birth_V,rep(0,13)) -
-    c(mono_01,mono_23,rep(0,12))-
+  dy[,'M0'] <- period.birth.rate - c(birth_V,rep(0,13)) - c(birth_N,rep(0,13)) -
     parms$sigma3*lambda*M0 -
     omega*M0-
     (mu+um)*M0 +
     Aging.Prop*c(0,M0[1:(N.ages-1)])
 
   # newborns who receive monoclonals
-  dy[,'Mn'] <- c(mono_01,mono_23,rep(0,12))-
-    RRIn*parms$sigma3*lambda*Mn -
-    waningN*Mn-
-    (mu+um)*Mn +
-    Aging.Prop*c(0,Mn[1:(N.ages-1)]) #aging in
+  dy[,'Mn1'] <- c(birth_N,rep(0,13)) -
+    RRIn*parms$sigma3*lambda*Mn1 -
+    waningN*Mn1-
+    (mu+um)*Mn1 +
+    Aging.Prop*c(0,Mn1[1:(N.ages-1)]) #aging in
 
-  dy[,'Mv'] <- c(birth_V,rep(0,13)) -
-    RRIn*parms$sigma3*lambda*Mv -
-    waningV*Mv-
-    (mu+um)*Mv +
-    Aging.Prop*c(0,Mv[1:(N.ages-1)]) #aging in
+  dy[,'Mn2'] <- waningN*Mn1-
+   lambda*Mn2 -
+    waningN2*Mn2-
+    (mu+um)*Mn2 +
+    Aging.Prop*c(0,Mn2[1:(N.ages-1)]) #aging in
+
+  dy[,'Mv1'] <- c(birth_V,rep(0,13)) -
+    RRIv*parms$sigma3*lambda*Mv1 -
+    waningV*Mv1-
+    (mu+um)*Mv1 +
+    Aging.Prop*c(0,Mv1[1:(N.ages-1)]) #aging in
+
+  dy[,'Mv2'] <- waningV*Mv1 -
+    lambda*Mv2 -
+    waningV2*Mv2-
+    (mu+um)*Mv2 +
+    Aging.Prop*c(0,Mv2[1:(N.ages-1)]) #
 
   # infants <8 months who did not receive nirsevimab at birth but receive a catch-up dose ahead of the season
   # these infants can be in the M0 or S0 compartments
-  dy[,'N'] <- c(0,0,mono_45,mono_67,rep(0,10)) - #from both M0 and S0 compartments
-    RRIn*lambda*N -
-    waningN*N-
-    (mu + um)*N +
-    Aging.Prop*c(0,N[1:(N.ages-1)])
+  dy[,'N1'] <- c(rep(mabs_catchup*.25,4),rep(0,10)) - #from both M0 and S0 compartments
+    RRIn*lambda*N1 -
+    waningN*N1-
+    (mu + um)*N1 +
+    Aging.Prop*c(0,N1[1:(N.ages-1)])
 
 
-  dy[,'Si'] <-  waningN*N + waningN*Mn + waningV*Mv-
+  dy[,'N2'] <-  waningN*N1-
+    RRIn*lambda*N2 -
+    waningN2*N2-
+    (mu + um)*N2 +
+    Aging.Prop*c(0,N2[1:(N.ages-1)])
+
+
+  dy[,'Si'] <-  waningN2*N2 + waningN2*Mn2 + waningV2*Mv2-
     lambda*Si -
     (mu + um)*Si +
     Aging.Prop*c(0,Si[1:(N.ages-1)])
 
   dy[,'S0'] <- omega*M0 -
-    c(0,0,mono_45,mono_67,rep(0,10)) -
+    c(rep(mabs_catchup*.25,4),rep(0,10)) -
     lambda*S0 -
     (mu + um)*S0 +
     Aging.Prop*c(0,S0[1:(N.ages-1)])
 
-  dy[,'I1'] <-  lambda*S0+ lambda*Si+ RRIn*lambda*N +
-    parms$sigma3*lambda*M0 +  RRIn*parms$sigma3*lambda*Mn + RRIv*parms$sigma3*lambda*Mv-
+  dy[,'I1'] <-  lambda*S0+ lambda*Si+ RRIn*lambda*N1 +RRIn*lambda*N2 +
+    parms$sigma3*lambda*M0 +  RRIn*parms$sigma3*lambda*Mn1 +RRIn*lambda*Mn2 + RRIv*parms$sigma3*lambda*Mv1 +RRIv*lambda*Mv2 -
     gamma1*I1-
     (mu + um)*I1 +
     Aging.Prop*c(0,I1[1:(N.ages-1)])
@@ -251,6 +247,5 @@ MSIRS_immunization_dynamics <- function(times,y,parms){
 
   return(res)
 }
-
 
 

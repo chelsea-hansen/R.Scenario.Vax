@@ -119,7 +119,7 @@ scenario_projection = function(fitted_parms,
   sen75.2 <- diff(c(0, sen75.1))
 
   # Compute adult vaccination doses and cumulative sum
-  adult75_vax <- c(rep(0, length(sen1) + 104), adult75_doses_last_year, sen75.2 * adult75_doses, rep(0, length(sen3)))[seq_along(fit_times)]
+  adult75_vax <- c(rep(0, length(sen1) + 104), adult75_doses_last_year*.9, sen75.2 * adult75_doses*.9, rep(0, length(sen3)))[seq_along(fit_times)]
 
   #For Adults 65-74
   # Calculate sigmoid values and differences
@@ -127,7 +127,7 @@ scenario_projection = function(fitted_parms,
   sen65.2 <- diff(c(0, sen65.1))
 
   # Compute adult vaccination doses and cumulative sum
-  adult65_vax <- c(rep(0, length(sen1) + 104), adult65_74_doses_last_year, sen65.2 * adult65_74_doses, rep(0, length(sen3)))[seq_along(fit_times)]
+  adult65_vax <- c(rep(0, length(sen1) + 104), adult65_74_doses_last_year*.85, sen65.2 * adult65_74_doses*.85, rep(0, length(sen3)))[seq_along(fit_times)]
 
   #Maternal Vaccination
   # Generate date sequences
@@ -169,10 +169,8 @@ scenario_projection = function(fitted_parms,
   # Compute monoclonal birth doses and cumulative sum
   monoclonal_birth <- c(rep(0, length(bir1) + 104), mon5 * monoclonal_birth_doses, rep(0, length(bir3)))[seq_along(fit_times)]
 
-  parmset$monoclonal_01 = monoclonal_birth
-  parmset$monoclonal_23 = monoclonal_catchup*.34
-  parmset$monoclonal_45 = monoclonal_catchup*.33
-  parmset$monoclonal_67 = monoclonal_catchup*.33
+  parmset$monoclonal_birth = monoclonal_birth
+  parmset$monoclonal_catchup = monoclonal_catchup
   parmset$maternal_vax = maternal_vax
   parmset$senior_vax_75 = adult75_vax
   parmset$senior_vax_65_74 = adult65_vax
@@ -211,9 +209,12 @@ scenario_projection = function(fitted_parms,
       R4 <- St[,grep('R4', colnames(St))]
       M0<- St[,grep('M0', colnames(St))]
       Si<- St[,grep('Si', colnames(St))]
-      Mn<- St[,grep('Mn', colnames(St))]
-      Mv<- St[,grep('Mv', colnames(St))]
-      N<- St[,grep('N', colnames(St))]
+      Mn1<- St[,grep('Mn1', colnames(St))]
+      Mn2<- St[,grep('Mn2', colnames(St))]
+      Mv1<- St[,grep('Mv1', colnames(St))]
+      Mv2<- St[,grep('Mv2', colnames(St))]
+      N1<- St[,grep('N1', colnames(St))]
+      N2<- St[,grep('N2', colnames(St))]
       Vs1<- St[,grep('Vs1', colnames(St))]
       Vs2<- St[,grep('Vs2', colnames(St))]
 
@@ -234,16 +235,19 @@ scenario_projection = function(fitted_parms,
       for (i in 1:al) {
         H1[, i] <-
           hosp1[i] * parmset$RRHm * parmset$sigma3 * M0[, i] * lambda1[, i] +
-          hosp1[i] * parmset$RRHm * parmset$sigma3 * Mn[, i] * lambda1[, i] +
-          hosp1[i] * parmset$RRHm * parmset$sigma3 * Mv[, i] * lambda1[, i] +
-          hosp1[i] * N[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHm * parmset$RRHn1 * parmset$sigma3 * Mn1[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHm * parmset$RRHn2 *  Mn2[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHm * parmset$RRHv1 * parmset$sigma3 * Mv1[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHm * parmset$RRHv2 * Mv2[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHn1 * N1[, i] * lambda1[, i] +
+          hosp1[i] * parmset$RRHn2 * N2[, i] * lambda1[, i] +
           hosp1[i] * S0[, i] * lambda1[, i] +
           hosp1[i] * Si[, i] * lambda1[, i] +
           hosp2[i] * parmset$sigma1 * S1[, i] * lambda1[, i] +
           hosp3[i] * parmset$sigma2 * S2[, i] * lambda1[, i] +
           hosp3[i] * parmset$sigma3 * S3[, i] * lambda1[, i] +
-          hosp3[i] * parmset$sigma3 * Vs1[, i] * lambda1[, i] +
-          hosp3[i] * parmset$sigma3 * Vs2[, i] * lambda1[, i]
+          hosp3[i] * parmset$sigma3 * parmset$RRHs *Vs1[, i] * lambda1[, i] +
+          hosp3[i] * parmset$sigma3 * parmset$RRHs *Vs2[, i] * lambda1[, i]
       }
 
       H2 = cbind(rowSums(H1[,1:3]),
@@ -258,9 +262,8 @@ scenario_projection = function(fitted_parms,
       names(H)=c("<6m","6-11m","1-4yrs","5-64yrs","65-74yrs","75+yrs")
       H$All = rowSums(H2)
       H$date = dates$new_date
-      H$monoclonal_birth = cumsum(tail(parmset$monoclonal_01,nrow(dates)))
-      H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_23,nrow(dates)) + tail(parmset$monoclonal_45,nrow(dates)) + tail(parmset$monoclonal_67,nrow(dates)))
-      H$maternal_vax  = cumsum(tail(parmset$maternal_vax,nrow(dates)))
+      H$monoclonal_birth = cumsum(tail(parmset$monoclonal_birth,nrow(dates)))
+      H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_catchup,nrow(dates)))
       H$adult_vax_65to74 = cumsum(tail(parmset$senior_vax_65_74,nrow(dates)))
       H$adult_vax_75 = cumsum(tail(parmset$senior_vax_75,nrow(dates)))
 
@@ -322,6 +325,7 @@ scenario_projection = function(fitted_parms,
                 func=MSIRS_immunization_dynamics,
                 parms=parmset)
 
+
   t0=nrow(dates)
   al <- nrow(yinit)
   output <- tail(output,t0)
@@ -340,9 +344,12 @@ scenario_projection = function(fitted_parms,
   R4 <- St[,grep('R4', colnames(St))]
   M0<- St[,grep('M0', colnames(St))]
   Si<- St[,grep('Si', colnames(St))]
-  Mn<- St[,grep('Mn', colnames(St))]
-  Mv<- St[,grep('Mv', colnames(St))]
-  N<- St[,grep('N', colnames(St))]
+  Mn1<- St[,grep('Mn1', colnames(St))]
+  Mn2<- St[,grep('Mn2', colnames(St))]
+  Mv1<- St[,grep('Mv1', colnames(St))]
+  Mv2<- St[,grep('Mv2', colnames(St))]
+  N1<- St[,grep('N1', colnames(St))]
+  N2<- St[,grep('N2', colnames(St))]
   Vs1<- St[,grep('Vs1', colnames(St))]
   Vs2<- St[,grep('Vs2', colnames(St))]
 
@@ -363,17 +370,22 @@ scenario_projection = function(fitted_parms,
   for (i in 1:al) {
     H1[, i] <-
       hosp1[i] * parmset$RRHm * parmset$sigma3 * M0[, i] * lambda1[, i] +
-      hosp1[i] * parmset$RRHm * parmset$sigma3 * Mn[, i] * lambda1[, i] +
-      hosp1[i] * parmset$RRHm * parmset$sigma3 * Mv[, i] * lambda1[, i] +
-      hosp1[i] * N[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHn1 * parmset$sigma3 * Mn1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHn2 *  Mn2[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHv1 * parmset$sigma3 * Mv1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHv2 * Mv2[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHn1 * N1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHn2 * N2[, i] * lambda1[, i] +
       hosp1[i] * S0[, i] * lambda1[, i] +
       hosp1[i] * Si[, i] * lambda1[, i] +
       hosp2[i] * parmset$sigma1 * S1[, i] * lambda1[, i] +
       hosp3[i] * parmset$sigma2 * S2[, i] * lambda1[, i] +
       hosp3[i] * parmset$sigma3 * S3[, i] * lambda1[, i] +
-      hosp3[i] * parmset$sigma3 * Vs1[, i] * lambda1[, i] +
-      hosp3[i] * parmset$sigma3 * Vs2[, i] * lambda1[, i]
+      hosp3[i] * parmset$sigma3* parmset$RRHs * Vs1[, i] * lambda1[, i] +
+      hosp3[i] * parmset$sigma3* parmset$RRHs * Vs2[, i] * lambda1[, i]
   }
+
+
 
   H2 = cbind(rowSums(H1[,1:3]),
              rowSums(H1[,4:6]),
@@ -387,8 +399,8 @@ scenario_projection = function(fitted_parms,
   names(H)=c("<6m","6-11m","1-4yrs","5-64yrs","65-74yrs","75+yrs")
   H$All = rowSums(H2)
   H$date = dates$new_date
-  H$monoclonal_birth = cumsum(tail(parmset$monoclonal_01,nrow(dates)))
-  H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_23,nrow(dates)) + tail(parmset$monoclonal_45,nrow(dates)) + tail(parmset$monoclonal_67,nrow(dates)))
+  H$monoclonal_birth = cumsum(tail(parmset$monoclonal_birth,nrow(dates)))
+  H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_catchup,nrow(dates)))
   H$maternal_vax  = cumsum(tail(parmset$maternal_vax,nrow(dates)))
   H$adult_vax_65to74 = cumsum(tail(parmset$senior_vax_65_74,nrow(dates)))
   H$adult_vax_75 = cumsum(tail(parmset$senior_vax_75,nrow(dates)))

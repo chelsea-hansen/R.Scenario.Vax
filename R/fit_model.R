@@ -32,17 +32,19 @@
 fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
   fit_times = seq(1,length(time_series)+104,by=1)
-  parmset$monoclonal_01 = rep(0,length(time_series)+104)
-  parmset$monoclonal_23 = rep(0,length(time_series)+104)
-  parmset$monoclonal_45 = rep(0,length(time_series)+104)
-  parmset$monoclonal_67 = rep(0,length(time_series)+104)
+  #parmset$monoclonal_01 = rep(0,length(time_series)+104)
+  #parmset$monoclonal_23 = rep(0,length(time_series)+104)
+  #parmset$monoclonal_45 = rep(0,length(time_series)+104)
+  #parmset$monoclonal_67 = rep(0,length(time_series)+104)
+  parmset$monoclonal_birth = rep(0,length(time_series)+104)
+  parmset$monoclonal_catchup = rep(0,length(time_series)+104)
   parmset$maternal_vax = rep(0,length(time_series)+104)
   parmset$senior_vax_65_74 = rep(0,length(time_series)+104)
   parmset$senior_vax_75 = rep(0,length(time_series)+104)
 
   fitmodel <-  function(parameters,dat) {
     protrans <- parameters[1] # parameter for baseline transmission rate
-    baseline.txn.rate = 7+(8*(exp(protrans))) / (1+exp(protrans))
+    baseline.txn.rate = 5+(10*(exp(protrans))) / (1+exp(protrans))
     amp <- parameters[2] # parameter for seasonal amplitude
     b1 <-  .08+(.35*(exp(amp))) / (1+exp(amp))
     trans <- parameters[3] # parameter for seasonal phase
@@ -77,9 +79,12 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
     S0 <- St[,grep('S0', colnames(St))]
     M0 <- St[,grep('M0', colnames(St))]
     Si<- St[,grep('Si', colnames(St))]
-    Mn<- St[,grep('Mn', colnames(St))]
-    Mv<- St[,grep('Mv', colnames(St))]
-    N<- St[,grep('N', colnames(St))]
+    Mn1<- St[,grep('Mn1', colnames(St))]
+    Mn2<- St[,grep('Mn2', colnames(St))]
+    Mv1<- St[,grep('Mv1', colnames(St))]
+    Mv2<- St[,grep('Mv2', colnames(St))]
+    N1<- St[,grep('N1', colnames(St))]
+    N2<- St[,grep('N2', colnames(St))]
     Vs1<- St[,grep('Vs1', colnames(St))]
     Vs2<- St[,grep('Vs2', colnames(St))]
 
@@ -97,16 +102,19 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
     for (i in 1:al) {
       H1[, i] <-
         hosp1[i] * parmset$RRHm * parmset$sigma3 * M0[, i] * lambda1[, i] +
-        hosp1[i] * parmset$RRHm * parmset$sigma3 * Mn[, i] * lambda1[, i] +
-        hosp1[i] * parmset$RRHm * parmset$sigma3 * Mv[, i] * lambda1[, i] +
-        hosp1[i] * N[, i] * lambda1[, i] +
+        hosp1[i] * parmset$RRHm * parmset$RRHn1 * parmset$sigma3 * Mn1[, i] * lambda1[, i] +
+        hosp1[i] * parmset$RRHm * parmset$RRHn2 *  Mn2[, i] * lambda1[, i] +
+        hosp1[i] * parmset$RRHm * parmset$RRHv1 * parmset$sigma3 * Mv1[, i] * lambda1[, i] +
+        hosp1[i] * parmset$RRHm * parmset$RRHv2 * Mv1[, i] * lambda1[, i] +
+        hosp1[i] * parmset$RRHn1 * N1[, i] * lambda1[, i] +
+        hosp1[i] * parmset$RRHn2 * N2[, i] * lambda1[, i] +
         hosp1[i] * S0[, i] * lambda1[, i] +
         hosp1[i] * Si[, i] * lambda1[, i] +
         hosp2[i] * parmset$sigma1 * S1[, i] * lambda1[, i] +
         hosp3[i] * parmset$sigma2 * S2[, i] * lambda1[, i] +
         hosp3[i] * parmset$sigma3 * S3[, i] * lambda1[, i] +
-        hosp3[i] * parmset$sigma3 * Vs1[, i] * lambda1[, i] +
-        hosp3[i] * parmset$sigma3 * Vs2[, i] * lambda1[, i]
+        hosp3[i] * parmset$sigma3 * parmset$RRHs * Vs1[, i] * lambda1[, i] +
+        hosp3[i] * parmset$sigma3 * parmset$RRHs * Vs2[, i] * lambda1[, i]
     }
 
     H <- rowSums(H1)
@@ -153,7 +161,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
 
   # Run optimization function  --------------------------------------
 
-  fitLL <- optim(par = c(-2.2,-2,2,-2,-4,-8,-5,-5),
+  fitLL <- optim(par = c(-0.5,-2,2,-2,-4,-8,-5,-5),
                 # lower = c(2,-2.4,1.5,-10,-10,-10,-10),
                 # upper = c(3,-1.2,2.5,2,-2,-2,-2),
                  fn = fitmodel,        # the distance function to optimize
@@ -163,7 +171,7 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   #fitLL = readRDS("C:/Users/hansencl/OneDrive - National Institutes of Health/Desktop/RSV Final/Model/2. Calibration/parameters_6Mar24.rds")
  # baseline.txn.rate=exp(fitLL$par[1])
  # b1=exp(fitLL$par[2])
-  baseline.txn.rate = 7+(8*(exp(fitLL$par[1]))) / (1+exp(fitLL$par[1]))
+  baseline.txn.rate = 5+(10*(exp(fitLL$par[1]))) / (1+exp(fitLL$par[1]))
   b1 <-  .08+(.35*(exp(fitLL$par[2]))) / (1+exp(fitLL$par[2]))
   phi=(2*pi*(exp(fitLL$par[3]))) / (1+exp(fitLL$par[3]))
   report_infants <- 1 / (1 + exp(-fitLL$par[4]))
@@ -217,9 +225,12 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   R4 <- St[,grep('R4', colnames(St))]
   M0<- St[,grep('M0', colnames(St))]
   Si<- St[,grep('Si', colnames(St))]
-  Mn<- St[,grep('Mn', colnames(St))]
-  Mv<- St[,grep('Mv', colnames(St))]
-  N<- St[,grep('N', colnames(St))]
+  Mn1<- St[,grep('Mn1', colnames(St))]
+  Mn2<- St[,grep('Mn2', colnames(St))]
+  Mv1<- St[,grep('Mv1', colnames(St))]
+  Mv2<- St[,grep('Mv2', colnames(St))]
+  N1<- St[,grep('N1', colnames(St))]
+  N2<- St[,grep('N2', colnames(St))]
   Vs1<- St[,grep('Vs1', colnames(St))]
   Vs2<- St[,grep('Vs2', colnames(St))]
 
@@ -235,21 +246,23 @@ fit_model = function(time_series, age_dist, parmset, yinit,yinit.vector){
   hosp2 <- hosp1 * 0.4
   hosp3 <- c(rep(0.001, 8), rep(report_adults, 4), report_seniors65, report_seniors75)
 
-
   H1 <- matrix(0, nrow = t0, ncol = al)
   for (i in 1:al) {
     H1[, i] <-
       hosp1[i] * parmset$RRHm * parmset$sigma3 * M0[, i] * lambda1[, i] +
-      hosp1[i] * parmset$RRHm * parmset$sigma3 * Mn[, i] * lambda1[, i] +
-      hosp1[i] * parmset$RRHm * parmset$sigma3 * Mv[, i] * lambda1[, i] +
-      hosp1[i] * N[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHn1 * parmset$sigma3 * Mn1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHn2 *  Mn2[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHv1 * parmset$sigma3 * Mv1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHm * parmset$RRHv2 * Mv1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHn1 * N1[, i] * lambda1[, i] +
+      hosp1[i] * parmset$RRHn2 * N2[, i] * lambda1[, i] +
       hosp1[i] * S0[, i] * lambda1[, i] +
       hosp1[i] * Si[, i] * lambda1[, i] +
       hosp2[i] * parmset$sigma1 * S1[, i] * lambda1[, i] +
       hosp3[i] * parmset$sigma2 * S2[, i] * lambda1[, i] +
       hosp3[i] * parmset$sigma3 * S3[, i] * lambda1[, i] +
-      hosp3[i] * parmset$sigma3 * Vs1[, i] * lambda1[, i] +
-      hosp3[i] * parmset$sigma3 * Vs2[, i] * lambda1[, i]
+      hosp3[i] * parmset$sigma3 *  parmset$RRHs * Vs1[, i] * lambda1[, i] +
+      hosp3[i] * parmset$sigma3 *  parmset$RRHs * Vs2[, i] * lambda1[, i]
   }
 
   H2 <- rowSums(H1)
