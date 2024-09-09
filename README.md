@@ -6,10 +6,9 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of R.Scenario.Vax is to fit a deterministic, compartmental
-transmission model to RSV hospitalization data and provide scenario
-projections for the number of hospitalizations averted due to new
-immunization products.
+**R.Scenario.Vax**\* is an **R** package designed to provide
+**S**cenario projections for **RSV** hospitalizations in the context of
+new **V**accines and immunizations.
 
 ## Installation
 
@@ -21,12 +20,69 @@ You can install the development version of R.Scenario.Vax from
 remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 ```
 
-## Model Diagram
+## Model Structure
 
-<figure>
-<img src="man/figures/model_diagram.PNG" alt="Model Diagram" />
-<figcaption aria-hidden="true">Model Diagram</figcaption>
-</figure>
+- Infants are born into the “M” compartment with partial protection
+  against infection. As this protection wanes, they transition to the
+  “S0” compartment until they experience their first infection, “I1”.
+
+- After they recover from their first infection, they have a short
+  period of sterilizing immunity, “R1”. When this immunity wanes, they
+  are susceptible again, “S1”, but with lower risk of infection.
+
+- After each subsequent infection individuals are less infectious,
+  recover more quickly, have a longer duration of immunity and a lower
+  risk of future infections.
+
+- A proportion of individuals who become infected will require
+  hospitalizatio (compartments not shown). The risk of hospitalization
+  is based on both age and number of previous infections.
+
+![](man/figures/base_model.PNG)
+
+### Infant Immunizations
+
+- Infants born to vaccinated persons start in the “Mv1” compartment.
+  These infants have the same protection against infection as the
+  infants in the “M” compartment but have additional protection against
+  hospitalization given infection.
+
+- After the protection against infection wanes, infants continue to have
+  protection against hospitalization given infection, “Mv2”. After this
+  protection wanes they no longer have any protection and move to the
+  “Si” compartment.
+
+- Some infants receive a dose of monoclonal antibodies at or shortly
+  after birth, “Mn1”. These infants have the same protection against
+  infection as the infants in the “M” compartment but have additional
+  protection against hospitalization given infection.
+
+- After the protection against infection wanes, they continue to have
+  protection against hospitalization given infection, “Mn2”. After this
+  protection wanes they no longer have any protection and move to the
+  “Si” compartment.
+
+- Some infants receive a catch-up dose of monoclonal antibodies before
+  the RSV season. which confers protection against hospitalization but
+  not protection against infection. These infants move from “S0” to “N1”
+  and then to “N2”. Infants spend the same length of time in “N1” and
+  “N2” and the level of protection is the same. After this protection
+  wanes they no longer have any protection and move to the “Si”
+  compartment.
+
+![](man/figures/infant_model.PNG)
+
+### Vaccination for Older Adults
+
+Adults over 60 who receive a vaccine have a similar risk of infection as
+adults in the “S3” compartment, but have some protection against
+hospitalization given infection. Upon vaccination adults move to the
+“Vs1” compartment and then the “Vs2” compartment. They spend the same
+amount of time in each of these compartments and the protection is the
+same. After this protection wanes they no longer have any protection
+against hospitalization and return to the “S3” compartment.
+
+![](man/figures/senior_model.PNG)
 
 ## Fixed Model Parameters
 
@@ -39,13 +95,13 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 | <sup>2</sup>Relative risk of infection following second infection (σ<sub>2</sub>)                        | 0.72         |
 | <sup>2</sup>Relative risk of infection following third or later infection (σ<sub>3</sub>)                | 0.24         |
 | Relative risk of infection with maternal immunity (same as RR following third infection) (σ<sub>3</sub>) | 0.24         |
-| <sup>1</sup>Duration of maternal immunity (1/ω<sub>1</sub>)                                              | 112 days     |
+| <sup>1</sup>Duration of maternal immunity (1/ω<sub>1</sub>)                                              | 90 days      |
 | <sup>3</sup>Duration of immunity following first and second infections (1/ω<sub>2</sub>)                 | 182.625 days |
 | <sup>2</sup>Duration of immunity following third or later infections (1/ω<sub>3</sub>)                   | 358.9 days   |
 | <sup>1</sup>Relative infectiousness - second infections (ρ<sub>1</sub>)                                  | 0.75         |
 | <sup>1</sup>Relative infectiousness - third or later infections (ρ<sub>2</sub>)                          | 0.51         |
 | Baseline transmission rate (β)                                                                           | Fitted       |
-| Amplitude of seasonal forcing (\*b\*1)                                                                   | Fitted       |
+| Amplitude of seasonal forcing (*b*<sub>1</sub>)                                                          | Fitted       |
 | Phase of seasonal forcing (φ)                                                                            | Fitted       |
 | Infections that lead to reported hospitalizations (\<2m, 2-11 months fixed relative to this)             | Fitted       |
 | Infections that lead to reported hospitalizations (1-4yrs)                                               | Fitted       |
@@ -53,11 +109,10 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 | Infections that lead to reported hospitalizations (65-74 yrs)                                            | Fitted       |
 | Infections that lead to reported hospitalizations (75+ yrs)                                              | Fitted       |
 | Nirsevimab effectiveness                                                                                 | 80%          |
-| Duration of nirsevimab protection                                                                        | 150 days     |
 | maternal vaccination effectiveness                                                                       | 55%          |
-| Duration of protection from maternal vaccination                                                         | 180 days     |
+| Duration of infant immunizations after maternal protection wanes (1/ω<sub>i</sub>)                       | 90 days      |
 | Vaccine effectiveness in older adults                                                                    | 80%          |
-| Duration of vaccine effectiveness in older adults                                                        | 2 years      |
+| Duration of vaccine effectiveness in older adults (1/ω<sub>v</sub>)                                      | 2 years      |
 
 References: 1. Pitzer et al.; 2. Hodgson et al.; 3. Ohuma et al. 
 
@@ -83,6 +138,9 @@ reporting to RSV-Net in 2016.
   for children has been added based on the weekly average RSV
   hospitalization rate during the 2018-19 and 2019-20 RSV seasons.
 
+- Data have been inflated to adjust for changes in RSV testing and
+  reporting during the COVID-19 pandemic.
+
 <img src="man/figures/README-example-1.png" width="100%" /><img src="man/figures/README-example-2.png" width="100%" />
 
 ## Example
@@ -100,8 +158,8 @@ the \<2m age class. The model assumes that individuals age exponentially
 into the next age class with the rate of aging equal to the inverse of
 the time spent in each age class. The net migration rate is applied
 uniformly across age classes. The model uses an expanded version of the
-contact matrix described by Mossong et al. to define contacts between
-age classes.
+contact matrix described by Mossong et al. 2008 to define contacts
+between age classes.
 
 The `get_data()` function will retrieve the fixed parameter values as
 well as the population data needed to run the model. This function
@@ -133,8 +191,8 @@ fit to the `timeseries` and `age_distribution` data sets.
 timeseries_ny = timeseries %>% filter(state=="New York",date<'2020-04-01')
 age_distribution_ny = age_distribution %>% filter(state=="New York")
 
-fitNY = fit_model(time_series = timeseries_ny$value, 
-                  age_dist = age_distribution_ny$proportion, 
+fitNY = fit_model(time_series = timeseries_ny$value, #Make sure this value is a vector
+                  age_dist = age_distribution_ny$proportion, #Make sure this value is a vector
                   parmset = fixed_parameters,
                   yinit = yinit,
                   yinit.vector = yinit.vector)
