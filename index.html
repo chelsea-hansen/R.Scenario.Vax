@@ -50,7 +50,7 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The goal of R.Scenario.Vax is to fit a deterministic, compartmental transmission model to RSV hospitalization data and provide scenario projections for the number of hospitalizations averted due to new immunization products.</p>
+<p><strong>R.Scenario.Vax</strong>* is an <strong>R</strong> package designed to provide <strong>S</strong>cenario projections for <strong>RSV</strong> hospitalizations in the context of new <strong>V</strong>accines and immunizations.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -60,11 +60,33 @@
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"chelsea-hansen/R.Scenario.Vax"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="model-diagram">Model Diagram<a class="anchor" aria-label="anchor" href="#model-diagram"></a>
+<h2 id="model-structure">Model Structure<a class="anchor" aria-label="anchor" href="#model-structure"></a>
 </h2>
-<figure><img src="reference/figures/model_diagram.PNG" alt="Model Diagram"><figcaption aria-hidden="true">
-Model Diagram
-</figcaption></figure>
+<ul>
+<li><p>Infants are born into the “M” compartment with partial protection against infection. As this protection wanes, they transition to the “S0” compartment until they experience their first infection, “I1”.</p></li>
+<li><p>After they recover from their first infection, they have a short period of sterilizing immunity, “R1”. When this immunity wanes, they are susceptible again, “S1”, but with lower risk of infection.</p></li>
+<li><p>After each subsequent infection individuals are less infectious, recover more quickly, have a longer duration of immunity and a lower risk of future infections.</p></li>
+<li><p>A proportion of individuals who become infected will require hospitalizatio (compartments not shown). The risk of hospitalization is based on both age and number of previous infections.</p></li>
+</ul>
+<p><img src="reference/figures/base_model.PNG"></p>
+<div class="section level3">
+<h3 id="infant-immunizations">Infant Immunizations<a class="anchor" aria-label="anchor" href="#infant-immunizations"></a>
+</h3>
+<ul>
+<li><p>Infants born to vaccinated persons start in the “Mv1” compartment. These infants have the same protection against infection as the infants in the “M” compartment but have additional protection against hospitalization given infection.</p></li>
+<li><p>After the protection against infection wanes, infants continue to have protection against hospitalization given infection, “Mv2”. After this protection wanes they no longer have any protection and move to the “Si” compartment.</p></li>
+<li><p>Some infants receive a dose of monoclonal antibodies at or shortly after birth, “Mn1”. These infants have the same protection against infection as the infants in the “M” compartment but have additional protection against hospitalization given infection.</p></li>
+<li><p>After the protection against infection wanes, they continue to have protection against hospitalization given infection, “Mn2”. After this protection wanes they no longer have any protection and move to the “Si” compartment.</p></li>
+<li><p>Some infants receive a catch-up dose of monoclonal antibodies before the RSV season. which confers protection against hospitalization but not protection against infection. These infants move from “S0” to “N1” and then to “N2”. Infants spend the same length of time in “N1” and “N2” and the level of protection is the same. After this protection wanes they no longer have any protection and move to the “Si” compartment.</p></li>
+</ul>
+<p><img src="reference/figures/infant_model.PNG"></p>
+</div>
+<div class="section level3">
+<h3 id="vaccination-for-older-adults">Vaccination for Older Adults<a class="anchor" aria-label="anchor" href="#vaccination-for-older-adults"></a>
+</h3>
+<p>Adults over 60 who receive a vaccine have a similar risk of infection as adults in the “S3” compartment, but have some protection against hospitalization given infection. Upon vaccination adults move to the “Vs1” compartment and then the “Vs2” compartment. They spend the same amount of time in each of these compartments and the protection is the same. After this protection wanes they no longer have any protection against hospitalization and return to the “S3” compartment.</p>
+<p><img src="reference/figures/senior_model.PNG"></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="fixed-model-parameters">Fixed Model Parameters<a class="anchor" aria-label="anchor" href="#fixed-model-parameters"></a>
@@ -116,7 +138,7 @@ Model Diagram
 <tr class="even">
 <td>
 <sup>1</sup>Duration of maternal immunity (1/ω<sub>1</sub>)</td>
-<td>112 days</td>
+<td>90 days</td>
 </tr>
 <tr class="odd">
 <td>
@@ -143,7 +165,7 @@ Model Diagram
 <td>Fitted</td>
 </tr>
 <tr class="even">
-<td>Amplitude of seasonal forcing (*b*1)</td>
+<td>Amplitude of seasonal forcing (<em>b</em><sub>1</sub>)</td>
 <td>Fitted</td>
 </tr>
 <tr class="odd">
@@ -175,23 +197,19 @@ Model Diagram
 <td>80%</td>
 </tr>
 <tr class="even">
-<td>Duration of nirsevimab protection</td>
-<td>150 days</td>
-</tr>
-<tr class="odd">
 <td>maternal vaccination effectiveness</td>
 <td>55%</td>
 </tr>
-<tr class="even">
-<td>Duration of protection from maternal vaccination</td>
-<td>180 days</td>
-</tr>
 <tr class="odd">
+<td>Duration of infant immunizations after maternal protection wanes (1/ω<sub>i</sub>)</td>
+<td>90 days</td>
+</tr>
+<tr class="even">
 <td>Vaccine effectiveness in older adults</td>
 <td>80%</td>
 </tr>
-<tr class="even">
-<td>Duration of vaccine effectiveness in older adults</td>
+<tr class="odd">
+<td>Duration of vaccine effectiveness in older adults (1/ω<sub>v</sub>)</td>
 <td>2 years</td>
 </tr>
 </tbody>
@@ -210,6 +228,7 @@ Model Diagram
 <ul>
 <li><p>RSV-Net provides data on RSV hospitalization rates. We have converted these to an approximate number of hospitalizations for use in the model.</p></li>
 <li><p>RSV-Net did not include data for children until 2018. Simulated data for children has been added based on the weekly average RSV hospitalization rate during the 2018-19 and 2019-20 RSV seasons.</p></li>
+<li><p>Data have been inflated to adjust for changes in RSV testing and reporting during the COVID-19 pandemic.</p></li>
 </ul>
 <p><img src="reference/figures/README-example-1.png" width="100%"><img src="reference/figures/README-example-2.png" width="100%"></p>
 </div>
@@ -220,7 +239,7 @@ Model Diagram
 <div class="section level3">
 <h3 id="step-1-retrieve-starting-values-and-fixed-parameters">Step 1: Retrieve starting values and fixed parameters<a class="anchor" aria-label="anchor" href="#step-1-retrieve-starting-values-and-fixed-parameters"></a>
 </h3>
-<p>The model requires data on birth rates, net migration rates, and the age-specific population distribution. The <code><a href="reference/get_data.html">get_data()</a></code> function will pull the necessary data using the <code>tidycensus</code> R package for the year 2022 (most recent available data). The annual birth rate is converted to a weekly number of births and is used to introduce new individuals into the &lt;2m age class. The model assumes that individuals age exponentially into the next age class with the rate of aging equal to the inverse of the time spent in each age class. The net migration rate is applied uniformly across age classes. The model uses an expanded version of the contact matrix described by Mossong et al. to define contacts between age classes.</p>
+<p>The model requires data on birth rates, net migration rates, and the age-specific population distribution. The <code><a href="reference/get_data.html">get_data()</a></code> function will pull the necessary data using the <code>tidycensus</code> R package for the year 2022 (most recent available data). The annual birth rate is converted to a weekly number of births and is used to introduce new individuals into the &lt;2m age class. The model assumes that individuals age exponentially into the next age class with the rate of aging equal to the inverse of the time spent in each age class. The net migration rate is applied uniformly across age classes. The model uses an expanded version of the contact matrix described by Mossong et al. 2008 to define contacts between age classes.</p>
 <p>The <code><a href="reference/get_data.html">get_data()</a></code> function will retrieve the fixed parameter values as well as the population data needed to run the model. This function returns a list with 3 values. 1. Fixed parameters 2. Initial values for model compartments 3. Vectorized version of the initial values for model compartments</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/chelsea-hansen/R.Scenario.Vax" class="external-link">R.Scenario.Vax</a></span><span class="op">)</span></span>
@@ -240,8 +259,8 @@ Model Diagram
 <span><span class="va">timeseries_ny</span> <span class="op">=</span> <span class="va">timeseries</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">state</span><span class="op">==</span><span class="st">"New York"</span>,<span class="va">date</span><span class="op">&lt;</span><span class="st">'2020-04-01'</span><span class="op">)</span></span>
 <span><span class="va">age_distribution_ny</span> <span class="op">=</span> <span class="va">age_distribution</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">state</span><span class="op">==</span><span class="st">"New York"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fitNY</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span><span class="op">$</span><span class="va">value</span>, </span>
-<span>                  age_dist <span class="op">=</span> <span class="va">age_distribution_ny</span><span class="op">$</span><span class="va">proportion</span>, </span>
+<span><span class="va">fitNY</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span><span class="op">$</span><span class="va">value</span>, <span class="co">#Make sure this value is a vector</span></span>
+<span>                  age_dist <span class="op">=</span> <span class="va">age_distribution_ny</span><span class="op">$</span><span class="va">proportion</span>, <span class="co">#Make sure this value is a vector</span></span>
 <span>                  parmset <span class="op">=</span> <span class="va">fixed_parameters</span>,</span>
 <span>                  yinit <span class="op">=</span> <span class="va">yinit</span>,</span>
 <span>                  yinit.vector <span class="op">=</span> <span class="va">yinit.vector</span><span class="op">)</span></span></code></pre></div>
