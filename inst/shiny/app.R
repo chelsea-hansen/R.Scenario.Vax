@@ -24,9 +24,9 @@ ui <- fluidPage(
                  plotOutput("coverage", height = "800px")),
         tabPanel("Hospitalization Time Series",
                  plotOutput("timeseries", height = "800px")),
-        tabPanel("Hospitalization Summary Table",
+        tabPanel("Total Hospitalizations",
                  tableOutput("table")),
-        tabPanel("Difference from COunterfactual",
+        tabPanel("Difference from Counterfactual",
                  plotOutput("difference", height = "800px"))
       )
     )
@@ -137,8 +137,7 @@ server <- function(input, output, session) {
             legend.text = element_text(size = 15),
             legend.title = element_text(size = 20),
             title = element_text(size = 20)) +
-      labs(x = NULL, y = "Cumulative Immunization Doses", color = "Scenario",
-           title = "Cumulative Immunization Doses by scenario")
+      labs(x = NULL, y = "Cumulative Immunization Doses", color = "Scenario")
   })
 
 
@@ -158,8 +157,7 @@ server <- function(input, output, session) {
             legend.title = element_text(size = 20),
             title = element_text(size = 20)) +
       guides(fill = "none") +
-      labs(x = NULL, y = "Hospitalization rate per 10,000", color = "Scenario",
-           title = "Weekly RSV hospitalization rate per 10,000 by scenario")
+      labs(x = NULL, y = "RSV Hospitalizations", color = "Scenario")
   })
 
 
@@ -180,8 +178,7 @@ server <- function(input, output, session) {
             legend.text = element_text(size = 15),
             legend.title = element_text(size = 20),
             title = element_text(size = 20)) +
-      labs(x = "% Difference", y = NULL, color = "Scenario",
-           title = "Difference from Counterfactual")
+      labs(x = "% Difference", y = NULL, color = "Scenario")
   })
 
 

@@ -1,6 +1,7 @@
 ## code to prepare `DATASET` dataset goes here
 #rm(list=ls())
 library(lubridate)
+#library(cdcfluview)
 library(imputeTS)
 library(tidyverse)
 library(lubridate)
@@ -12,7 +13,7 @@ library(zoo)
 # Data from RSV-NET -------------------------------------------
 dat = read.csv("data-raw/Weekly_Rates_of_Laboratory-Confirmed_RSV_Hospitalizations_from_the_RSV-NET_Surveillance_System_20240826.csv") %>%
   filter(Race=="All",Sex=="All",State!="RSV-NET",
-         Age.Category %in% c("0-<6 months","6mo-<12 months","1-4 years","5-17 years","18-49 years","50-64 years","65-74 years","75+ years")) %>%
+         Age.Category %in% c("0-<6 months","6mo-<12 months","1-4 years","5-17 years","18-49 years","50-64 years","65+ years")) %>%
   mutate(Age.Category = ifelse(Age.Category=="0-<6 months","<6m",
                                ifelse(Age.Category=="6mo-<12 months","6-11m",Age.Category)),
          mmwr_week=epiweek(Week.ending.date),
@@ -33,7 +34,7 @@ age_groups_of_interest <- c('<6m', '6-11m', '1-4 years', '5-17 years')
 
 #start with states that have begin in 2016
 
-group1 = dat %>% filter(State %in% c("California","Georgia","Maryland","Minnesota","New York","Tennessee","Oregon"))
+group1 = dat %>% filter(State %in% c("California","Georgia","Maryland","Minnesota","New York","Oregon"))
 
 grid1 = expand.grid(unique(group1$date),unique(group1$State),unique(group1$Age.Category))
 
@@ -46,7 +47,7 @@ average_rates1 <- group1 %>%
 join1  = group1 %>%
   full_join(grid1, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
   select(State,date,Age.Category,Rate) %>%
-  mutate(mmwr_week=epiweek(date)) %>%
+  mutate(mmwr_week(date)) %>%
   full_join(average_rates1, by=c("State","Age.Category","mmwr_week")) %>%
   mutate(adj_rate = ifelse(is.na(Rate),Average.Rate,Rate)) %>%
   filter(date>='2016-10-08') %>%
@@ -67,6 +68,61 @@ ggplot(complete1)+
   geom_line(aes(x=date,y=adj_rate))+
   facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
 
+#States that start in 2017
+
+group2 = dat %>% filter(State %in% c("New Mexico"))
+
+grid2 = expand.grid(unique(group2$date),unique(group2$State),unique(group2$Age.Category))
+
+average_rates2 <- group2 %>%
+  filter(Age.Category %in% age_groups_of_interest, Season %in% c('2018-19', '2019-20')) %>%
+  group_by(State, Age.Category, mmwr_week) %>%
+  summarize(Average.Rate = mean(Rate, na.rm = TRUE)) %>%
+  ungroup()
+
+join2  = group2 %>%
+  full_join(grid2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
+  select(State,date,Age.Category,Rate) %>%
+  mutate(mmwr_week(date)) %>%
+  full_join(average_rates2, by=c("State","Age.Category","mmwr_week")) %>%
+  mutate(adj_rate = ifelse(is.na(Rate),Average.Rate,Rate)) %>%
+  select(date,State,Age.Category,adj_rate)
+
+
+ggplot(join2)+
+  geom_line(aes(x=date,y=adj_rate))+
+  facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
+
+dates2 = seq(from=as.Date('2017-10-07'),to=as.Date('2024-08-17'),by="week")
+grid2.2 = expand.grid(dates2,unique(join2$State),unique(join2$Age.Category))
+
+complete2 = join2 %>%
+  full_join(grid2.2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
+  mutate(adj_rate=na_interpolation(adj_rate))
+
+ggplot(complete2)+
+  geom_line(aes(x=date,y=adj_rate))+
+  facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
+
+
+#States that only start in 2018 - don't need to fill in child data for these
+group3 = dat %>% filter(State %in% c("Colorado","Connecticut","Michigan","Utah")) %>%
+  select(date,State,Age.Category,"adj_rate"=Rate)
+
+dates3 = seq(from=as.Date('2018-10-06'),to=as.Date('2024-08-17'),by="week")
+grid3.2 = expand.grid(dates3,unique(group3$State),unique(group3$Age.Category))
+
+complete3 = group3 %>%
+  full_join(grid3.2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
+  mutate(adj_rate=na_interpolation(adj_rate))
+
+ggplot(complete3)+
+  geom_line(aes(x=date,y=adj_rate))+
+  facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
+
+
+
+complete_data = rbind(complete1, complete2,complete3)
 
 
 pop1 = read.delim("data-raw/Single-Race Population Estimates 2010-2020 by State and Single-Year Age.txt")
@@ -79,8 +135,7 @@ pop=rbind(pop1,pop2) %>%
                                Five.Year.Age.Groups.Code %in% c("5-9","10-14","15-19")~"5-17 years",
                                Five.Year.Age.Groups.Code %in% c("20-24","25-29","30-34","35-39","40-44","45-49")~"18-49 years",
                                Five.Year.Age.Groups.Code %in% c("50-54","55-59","60-64")~"50-64 years",
-                               Five.Year.Age.Groups.Code %in% c("65-69","70-74")~"65-74 years",
-                               Five.Year.Age.Groups.Code %in% c("75-79","80-84","85+")~"75+ years")) %>%
+                               Five.Year.Age.Groups.Code %in% c("65-69","70-74","75-79","80-84","85+")~"65+ years")) %>%
   group_by(States,age_group,Yearly.July.1st.Estimates) %>%
   summarize(population = sum(Population))
 
@@ -97,14 +152,14 @@ pop_new = pop %>% filter(age_group!="1") %>%
   bind_rows(child1,child2)
 
 
-dat2 = complete1 %>%
+dat2 = complete_data %>%
   mutate(year = year(date)) %>%
   left_join(pop_new, by=c("Age.Category"="age_group","State"="States","year"="Yearly.July.1st.Estimates")) %>%
   arrange(Age.Category,State,date) %>%
   mutate(population = na_locf(population),
          count = adj_rate/100000*population,
-         new_age = factor(Age.Category, levels=c("<6m","6-11m","1-4 years","5-17 years","18-49 years","50-64 years","65-74 years","75+ years"),
-                          labels=c("<6m","6-11m","1-4 years","5-64 years","5-64 years","5-64 years","65-74 years","75+ years"))) %>%
+         new_age = factor(Age.Category, levels=c("<6m","6-11m","1-4 years","5-17 years","18-49 years","50-64 years","65+ years"),
+                          labels=c("<6m","6-11m","1-4 years","5-64 years","5-64 years","5-64 years","65+ years"))) %>%
   group_by(date,State,new_age) %>%
   summarize(count=sum(count),
             population=sum(population))
@@ -144,38 +199,26 @@ age_distribution = dist_by_time %>% filter(period=="pre-pandemic") %>%
 
 
 scaling = dist_by_time %>%
-  filter(period %in% c("pre-pandemic","current"),new_age %in% c("1-4 years","5-64 years")) %>%
-  group_by(period,State) %>%
-  summarize(total = sum(total)) %>%
-  ungroup() %>%
+  filter(period %in% c("pre-pandemic","current")) %>%
   mutate(adjust = ifelse(period=="pre-pandemic",total/2,total)) %>%
-  pivot_wider(id_cols=c(State),names_from=period,values_from=adjust) %>%
-  mutate(diff = current/`pre-pandemic`,
-         scale = ifelse(diff<1, 1, diff))
+  pivot_wider(id_cols=c(State, new_age),names_from=period,values_from=adjust) %>%
+  mutate(diff = current/`pre-pandemic`)
+
+
 
 timeseries = dat2 %>%
-  left_join(scaling) %>%
   group_by(date, State) %>%
   summarize(count=sum(count),
-            population=sum(population),
-            scale = unique(scale)) %>%
+            population=sum(population)) %>%
   ungroup() %>%
   group_by(State) %>%
-  mutate(count2 = ifelse(date<'2020-04-01',count*scale,count),
-         smooth = round(rollmean(count2,k=3,align="center",fill="extend"))) %>%
- select("state"=State,date,"value"=smooth)
+  mutate(smooth = round(rollmean(count,k=3,align="center",fill="extend"))) %>%
+  select("state"=State,date,"value"=smooth)
 
-
-#ggplot(timeseries)+
-  #geom_line(aes(x=date, y=count),color="blue")+
-  #geom_line(aes(x=date,y=count2),color="red")+
-  #facet_wrap(~State,scales="free")
 
 #ggplot(dat3)+
   #geom_line(aes(x=date,y=value))+
   #facet_grid(rows=vars(State),scales="free")
-
-timeseries = timeseries %>% filter(date<'2020-04-01')
 
 usethis::use_data(timeseries, overwrite = TRUE)
 usethis::use_data(age_distribution, overwrite = TRUE)
@@ -183,58 +226,8 @@ usethis::use_data(age_distribution, overwrite = TRUE)
 
 
 
-#States that start in 2017
-
-#group2 = dat %>% filter(State %in% c("New Mexico"))
-
-#grid2 = expand.grid(unique(group2$date),unique(group2$State),unique(group2$Age.Category))
-
-#average_rates2 <- group2 %>%
-# filter(Age.Category %in% age_groups_of_interest, Season %in% c('2018-19', '2019-20')) %>%
-# group_by(State, Age.Category, mmwr_week) %>%
-#  summarize(Average.Rate = mean(Rate, na.rm = TRUE)) %>%
-#  ungroup()
-
-#join2  = group2 %>%
-# full_join(grid2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
-# select(State,date,Age.Category,Rate) %>%
-# mutate(mmwr_week(date)) %>%
-# full_join(average_rates2, by=c("State","Age.Category","mmwr_week")) %>%
-#  mutate(adj_rate = ifelse(is.na(Rate),Average.Rate,Rate)) %>%
-#  select(date,State,Age.Category,adj_rate)
-
-
-#ggplot(join2)+
-# geom_line(aes(x=date,y=adj_rate))+
-#facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
-
-#dates2 = seq(from=as.Date('2017-10-07'),to=as.Date('2024-08-17'),by="week")
-#grid2.2 = expand.grid(dates2,unique(join2$State),unique(join2$Age.Category))
-
-#complete2 = join2 %>%
-#full_join(grid2.2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
-#mutate(adj_rate=na_interpolation(adj_rate))
-
-#ggplot(complete2)+
-#geom_line(aes(x=date,y=adj_rate))+
-#facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
-
-
-#States that only start in 2018 - don't need to fill in child data for these
-#group3 = dat %>% filter(State %in% c("Colorado","Connecticut","Michigan","Utah")) %>%
-#select(date,State,Age.Category,"adj_rate"=Rate)
-
-#dates3 = seq(from=as.Date('2018-10-06'),to=as.Date('2024-08-17'),by="week")
-#grid3.2 = expand.grid(dates3,unique(group3$State),unique(group3$Age.Category))
-
-#complete3 = group3 %>%
-#full_join(grid3.2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
-#mutate(adj_rate=na_interpolation(adj_rate))
-
-#ggplot(complete3)+
-#geom_line(aes(x=date,y=adj_rate))+
-#3facet_grid(cols=vars(State),rows=vars(Age.Category),scales="free")
+#Age distributions
 
 
 
-#complete_data = rbind(complete1, complete2,complete3)
+#Scaling pre-2020 data?
