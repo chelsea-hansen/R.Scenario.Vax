@@ -50,7 +50,7 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p><strong>R.Scenario.Vax</strong>* is an <strong>R</strong> package designed to provide <strong>S</strong>cenario projections for <strong>RSV</strong> hospitalizations in the context of new <strong>V</strong>accines and immunizations.</p>
+<p><strong>R.Scenario.Vax</strong> is an <strong>R</strong> package designed to provide <strong>S</strong>cenario projections for <strong>RSV</strong> hospitalizations in the context of new <strong>V</strong>accines and immunizations.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -230,7 +230,7 @@
 <li><p>RSV-Net did not include data for children until 2018. Simulated data for children has been added based on the weekly average RSV hospitalization rate during the 2018-19 and 2019-20 RSV seasons.</p></li>
 <li><p>Data have been inflated to adjust for changes in RSV testing and reporting during the COVID-19 pandemic.</p></li>
 </ul>
-<p><img src="reference/figures/README-example-1.png" width="100%"><img src="reference/figures/README-example-2.png" width="100%"></p>
+<p><img src="reference/figures/README-example-1.png" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -259,7 +259,7 @@
 <span><span class="va">timeseries_ny</span> <span class="op">=</span> <span class="va">timeseries</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">state</span><span class="op">==</span><span class="st">"New York"</span>,<span class="va">date</span><span class="op">&lt;</span><span class="st">'2020-04-01'</span><span class="op">)</span></span>
 <span><span class="va">age_distribution_ny</span> <span class="op">=</span> <span class="va">age_distribution</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">state</span><span class="op">==</span><span class="st">"New York"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fitNY</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span><span class="op">$</span><span class="va">value</span>, <span class="co">#Make sure this value is a vector</span></span>
+<span><span class="va">fitNY</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span><span class="op">$</span><span class="va">value</span>, <span class="co">#Make sure this value is a vector of whole numbers</span></span>
 <span>                  age_dist <span class="op">=</span> <span class="va">age_distribution_ny</span><span class="op">$</span><span class="va">proportion</span>, <span class="co">#Make sure this value is a vector</span></span>
 <span>                  parmset <span class="op">=</span> <span class="va">fixed_parameters</span>,</span>
 <span>                  yinit <span class="op">=</span> <span class="va">yinit</span>,</span>
@@ -267,10 +267,37 @@
 <p><img src="reference/figures/README-steptwo-1.png" width="100%"></p>
 </div>
 <div class="section level3">
+<h3 id="common-errors">Common errors<a class="anchor" aria-label="anchor" href="#common-errors"></a>
+</h3>
+<p>If the time series values are not whole numbers or the values given to the time_series and age_dist arguments are not vectors, you will receive an error message. Please see examples below.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">error1</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span><span class="op">$</span><span class="va">value</span><span class="op">*</span><span class="fl">1.1</span>, <span class="co">#NOT WHOLE NUMBERS</span></span>
+<span>                  age_dist <span class="op">=</span> <span class="va">age_distribution_ny</span><span class="op">$</span><span class="va">proportion</span>, </span>
+<span>                  parmset <span class="op">=</span> <span class="va">fixed_parameters</span>,</span>
+<span>                  yinit <span class="op">=</span> <span class="va">yinit</span>,</span>
+<span>                  yinit.vector <span class="op">=</span> <span class="va">yinit.vector</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in optim(par = c(-0.5, -2, 2, -2, -4, -8, -5, -5), fn = fitmodel, : function cannot be evaluated at initial parameters</span></span>
+<span></span>
+<span><span class="va">error2</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span>, <span class="co">#NOT A VECTOR</span></span>
+<span>                  age_dist <span class="op">=</span> <span class="va">age_distribution_ny</span><span class="op">$</span><span class="va">proportion</span>, </span>
+<span>                  parmset <span class="op">=</span> <span class="va">fixed_parameters</span>,</span>
+<span>                  yinit <span class="op">=</span> <span class="va">yinit</span>,</span>
+<span>                  yinit.vector <span class="op">=</span> <span class="va">yinit.vector</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in dpois(x = time_series, lambda = H, log = TRUE): Non-numeric argument to mathematical function</span></span>
+<span></span>
+<span><span class="va">error3</span> <span class="op">=</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span>time_series <span class="op">=</span> <span class="va">timeseries_ny</span><span class="op">$</span><span class="va">value</span>, </span>
+<span>                  age_dist <span class="op">=</span> <span class="va">age_distribution_ny</span>, <span class="co">#NOT A VECTOR </span></span>
+<span>                  parmset <span class="op">=</span> <span class="va">fixed_parameters</span>,</span>
+<span>                  yinit <span class="op">=</span> <span class="va">yinit</span>,</span>
+<span>                  yinit.vector <span class="op">=</span> <span class="va">yinit.vector</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in dmultinom(x = age_dist2, prob = age_dist, log = TRUE): x[] and prob[] must be equal length vectors.</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="step-3-scenario-projections">Step 3: Scenario Projections<a class="anchor" aria-label="anchor" href="#step-3-scenario-projections"></a>
 </h3>
 <p>Once you have the fitted parameters, use the <code><a href="reference/scenario_projection.html">scenario_projection()</a></code> function to run scenario projections for the number of RSV hospitalizations based on the number of immunizations administered. We are only running one example here, but you can run many scenarios. If you would like to use the Shiny App to display your results, please make sure to run a counterfactual scenario and name it “Counterfactual” and projection_intervals = TRUE.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">scenarioA</span> <span class="op">=</span> <span class="fu"><a href="reference/scenario_projection.html">scenario_projection</a></span><span class="op">(</span>fitted_parms  <span class="op">=</span> <span class="va">fitNY</span>,</span>
 <span>                                parmset <span class="op">=</span> <span class="va">fixed_parameters</span>,</span>
@@ -303,7 +330,7 @@
 <h3 id="step-4-launch-shiny-app">Step 4: Launch Shiny App<a class="anchor" aria-label="anchor" href="#step-4-launch-shiny-app"></a>
 </h3>
 <p>Once you have run several scenarios (including a “Counterfactual”), combine all scenarios using <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> or <code>bind_rows()</code> and save as a .rds file. Launch the Shiny App using the code below. The Shiny App will ask you to upload the saved results.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/display_scenarios.html">display_scenarios</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
