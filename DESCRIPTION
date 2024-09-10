@@ -4,7 +4,7 @@ Version: v1.0.0
 Authors@R: 
     person("Chelsea", "Hansen",  ,"chelsea.hansen@nih.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4526-6772"))
-Description: This package will fit a dynamic RSV transmission model to time series data and run scenario projections for immunization uptake.
+Description: This package designed to provide Scenario projections for RSV hospitalizations in the context of new vaccines and immunizations.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
