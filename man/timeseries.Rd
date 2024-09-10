@@ -28,6 +28,7 @@ Data is available for the 7 states that began participation in RSV-Net in 2016.
 RSV-Net provides data on RSV hospitalization rates.
 We have converted these to an approximate number of hospitalizations for use in the model.
 RSV-Net did not include data for children until 2018.
-Simulated data for children has been added based on the weekly average RSV hospitalization rate during the 2018-19 and 2019-20 RSV seasons.
+Simulated data for children has been added based on the weekly average RSV hospitalization rate among children during the 2018-19 and 2019-20 RSV seasons.
+Data have been inflated to adjust for increases in RSV testing and reporting after 2020.
 }
 \keyword{datasets}
