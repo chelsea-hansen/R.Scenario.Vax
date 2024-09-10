@@ -120,8 +120,10 @@ scenario_projection = function(fitted_parms,
   fill=104-length(sen75.2)
 
   # Compute adult vaccination doses and cumulative sum
+  #assuming 25% of doses are wasted because individual already exposed or already has immunity
   adult75_vax <- c(rep(0, length(sen1) + fill), sen75.2 *adult75_doses_last_year*.75, sen75.2 * adult75_doses*.75, rep(0, length(sen3)))[seq_along(fit_times)]
-  adult75_unscaled <- c(rep(0, length(sen1) + fill), sen75.2 *adult75_doses_last_year, sen75.2 * adult75_doses, rep(0, length(sen3)))[seq_along(fit_times)]
+ #save version without wasted doses for plotting
+   adult75_unscaled <- c(rep(0, length(sen1) + fill), sen75.2 *adult75_doses_last_year, sen75.2 * adult75_doses, rep(0, length(sen3)))[seq_along(fit_times)]
 
   #For Adults 65-74
   # Calculate sigmoid values and differences
@@ -129,7 +131,9 @@ scenario_projection = function(fitted_parms,
   sen65.2 <- diff(c(0, sen65.1))
 
   # Compute adult vaccination doses and cumulative sum
+  #assuming 30% of doses are wasted because individual already exposed or has immunity
   adult65_vax <- c(rep(0, length(sen1) + fill), sen65.2 * adult65_74_doses_last_year*.70, sen65.2 * adult65_74_doses*.70, rep(0, length(sen3)))[seq_along(fit_times)]
+  #saving version without wasted doses for plotting
   adult65_unscaled <- c(rep(0, length(sen1) + fill), sen65.2 * adult65_74_doses_last_year, sen65.2 * adult65_74_doses, rep(0, length(sen3)))[seq_along(fit_times)]
 
   #Maternal Vaccination
@@ -166,11 +170,13 @@ scenario_projection = function(fitted_parms,
   bir3 <- seq(as.Date(monoclonal_birth_end), as.Date(projection_end), by = "weeks")
 
   # Calculate sigmoid values and differences
-  bir4 <- monoclonal_birth_doses/length(bir2)
-  bir5 <- rep(bir4,length(bir2))
+  #bir4 <- monoclonal_birth_doses/length(bir2) #version with same amount each week instead of sigmoid
+  #bir5 <- rep(bir4,length(bir2))
+  bir4 <- c(sigmoid(seq_along(bir2) + 1, a = 0.26679, b = 12.50297), 1)
+  bir5 <- diff(c(0, bir4))
 
   # Compute monoclonal birth doses and cumulative sum
-  monoclonal_birth <- c(rep(0, length(bir1) + 104), bir5, rep(0, length(bir3)))[seq_along(fit_times)]
+  monoclonal_birth <- c(rep(0, length(bir1) + 104), bir5 * monoclonal_birth_doses, rep(0, length(bir3)))[seq_along(fit_times)]
 
   parmset$monoclonal_birth = monoclonal_birth
   parmset$monoclonal_catchup = monoclonal_catchup
@@ -268,8 +274,8 @@ scenario_projection = function(fitted_parms,
       H$date = dates$new_date
       H$monoclonal_birth = cumsum(tail(parmset$monoclonal_birth,nrow(dates)))
       H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_catchup,nrow(dates)))
-      H$adult_vax_65to74 = cumsum(tail(adult65_unscaled,nrow(dates)))
-      H$adult_vax_75 = cumsum(tail(adult75_unscaled,nrow(dates)))
+      H$adult_vax_65to74 = cumsum(tail(adult65_unscaled,nrow(dates))) #save the version without wasted doses for plotting
+      H$adult_vax_75 = cumsum(tail(adult75_unscaled,nrow(dates))) #save version without wasted doses for plotting
 
 
       H = H %>% filter(.data$date>=projection_start) %>%
@@ -404,11 +410,10 @@ scenario_projection = function(fitted_parms,
   names(H)=c("<6m","6-11m","1-4yrs","5-64yrs","65-74yrs","75+yrs")
   H$All = rowSums(H2)
   H$date = dates$new_date
-  H$monoclonal_birth = tail(cumsum(parmset$monoclonal_birth),nrow(dates))
-  H$monoclonal_catchup = tail(cumsum(parmset$monoclonal_catchup),nrow(dates))
-  H$maternal_vax  = tail(cumsum(parmset$maternal_vax),nrow(dates))
-  H$adult_vax_65to74 = tail(cumsum(parmset$senior_vax_65_74),nrow(dates))
-  H$adult_vax_75 = tail(cumsum(parmset$senior_vax_75),nrow(dates))
+  H$monoclonal_birth = cumsum(tail(parmset$monoclonal_birth,nrow(dates)))
+  H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_catchup,nrow(dates)))
+  H$adult_vax_65to74 = cumsum(tail(adult65_unscaled,nrow(dates))) #save the version without wasted doses for plotting
+  H$adult_vax_75 = cumsum(tail(adult75_unscaled,nrow(dates))) #save version without wasted doses for plotting
 
 
 newH = H %>% filter(.data$date>=projection_start) %>% mutate(scenario=scenario_name)

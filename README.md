@@ -6,9 +6,9 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-**R.Scenario.Vax**\* is an **R** package designed to provide
-**S**cenario projections for **RSV** hospitalizations in the context of
-new **V**accines and immunizations.
+**R.Scenario.Vax** is an **R** package designed to provide **S**cenario
+projections for **RSV** hospitalizations in the context of new
+**V**accines and immunizations.
 
 ## Installation
 
@@ -141,7 +141,7 @@ reporting to RSV-Net in 2016.
 - Data have been inflated to adjust for changes in RSV testing and
   reporting during the COVID-19 pandemic.
 
-<img src="man/figures/README-example-1.png" width="100%" /><img src="man/figures/README-example-2.png" width="100%" />
+<img src="man/figures/README-example-1.png" width="100%" />
 
 ## Example
 
@@ -191,7 +191,7 @@ fit to the `timeseries` and `age_distribution` data sets.
 timeseries_ny = timeseries %>% filter(state=="New York",date<'2020-04-01')
 age_distribution_ny = age_distribution %>% filter(state=="New York")
 
-fitNY = fit_model(time_series = timeseries_ny$value, #Make sure this value is a vector
+fitNY = fit_model(time_series = timeseries_ny$value, #Make sure this value is a vector of whole numbers
                   age_dist = age_distribution_ny$proportion, #Make sure this value is a vector
                   parmset = fixed_parameters,
                   yinit = yinit,
@@ -199,6 +199,36 @@ fitNY = fit_model(time_series = timeseries_ny$value, #Make sure this value is a 
 ```
 
 <img src="man/figures/README-steptwo-1.png" width="100%" />
+
+### Common errors
+
+If the time series values are not whole numbers or the values given to
+the time_series and age_dist arguments are not vectors, you will receive
+an error message. Please see examples below.
+
+``` r
+
+error1 = fit_model(time_series = timeseries_ny$value*1.1, #NOT WHOLE NUMBERS
+                  age_dist = age_distribution_ny$proportion, 
+                  parmset = fixed_parameters,
+                  yinit = yinit,
+                  yinit.vector = yinit.vector)
+#> Error in optim(par = c(-0.5, -2, 2, -2, -4, -8, -5, -5), fn = fitmodel, : function cannot be evaluated at initial parameters
+
+error2 = fit_model(time_series = timeseries_ny, #NOT A VECTOR
+                  age_dist = age_distribution_ny$proportion, 
+                  parmset = fixed_parameters,
+                  yinit = yinit,
+                  yinit.vector = yinit.vector)
+#> Error in dpois(x = time_series, lambda = H, log = TRUE): Non-numeric argument to mathematical function
+
+error3 = fit_model(time_series = timeseries_ny$value, 
+                  age_dist = age_distribution_ny, #NOT A VECTOR 
+                  parmset = fixed_parameters,
+                  yinit = yinit,
+                  yinit.vector = yinit.vector)
+#> Error in dmultinom(x = age_dist2, prob = age_dist, log = TRUE): x[] and prob[] must be equal length vectors.
+```
 
 ### Step 3: Scenario Projections
 

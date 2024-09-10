@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-**R.Scenario.Vax*** is an **R** package designed to provide **S**cenario projections for **RSV** hospitalizations in the context of new **V**accines and immunizations.
+**R.Scenario.Vax** is an **R** package designed to provide **S**cenario projections for **RSV** hospitalizations in the context of new **V**accines and immunizations.
 
 ## Installation
 
@@ -115,23 +115,26 @@ Notes:
 
 * Data have been inflated to adjust for changes in RSV testing and reporting during the COVID-19 pandemic. 
 
-```{r example, echo=FALSE, fig.width=12}
+```{r example, echo=FALSE, fig.height=12}
 library(R.Scenario.Vax)
 library(ggplot2)
 library(tidyverse)
+library(cowplot)
 
-ggplot(data=timeseries)+
+plot1 = ggplot(data=timeseries)+
   theme_bw()+
   geom_line(aes(x=date, y=value))+
-  facet_wrap(~state,scales="free")+
-  labs(x=NULL, y="RSV Hospitalizations",title ="timeseries dataset")
+  facet_wrap(~state,ncol=1,scales="free")+
+  labs(x="Date", y="RSV Hospitalizations",title ="timeseries dataset")
 
-ggplot(data=age_distribution)+
+plot2  = ggplot(data=age_distribution)+
   theme_bw()+
   geom_bar(aes(y=age_group,x=proportion),stat="identity")+
-  facet_wrap(~state,scales="free")+
-  labs(y="Age Group", x="Proportion of RSV Hospitalizations", title="age_distribution dataset")
+  facet_wrap(~state,ncol=1,scales="free")+
+  labs(y="Age Group", x="Proportion", title="age_distribution dataset")
 
+plot = plot_grid(plot1, plot2)
+print(plot)
 
 ```
 
@@ -158,6 +161,7 @@ ny_data = get_data(state_or_county="state",state_abbr="NY",county_name=NULL)
 fixed_parameters = ny_data[[1]]
 yinit = ny_data[[2]]
 yinit.vector = ny_data[[3]]
+
 ```
 
 ### Step 2: Fit model to data 
@@ -169,13 +173,41 @@ the `fit_model()` function will fit model parameters using maximum likelihood es
 timeseries_ny = timeseries %>% filter(state=="New York",date<'2020-04-01')
 age_distribution_ny = age_distribution %>% filter(state=="New York")
 
-fitNY = fit_model(time_series = timeseries_ny$value, #Make sure this value is a vector
+fitNY = fit_model(time_series = timeseries_ny$value, #Make sure this value is a vector of whole numbers
                   age_dist = age_distribution_ny$proportion, #Make sure this value is a vector
                   parmset = fixed_parameters,
                   yinit = yinit,
                   yinit.vector = yinit.vector)
 
 ```
+
+### Common errors 
+If the time series values are not whole numbers or the values given to the time_series and age_dist arguments are not vectors, you will receive an error message. Please see examples below. 
+```{r commonerrors, warning=FALSE, error=TRUE}
+
+error1 = fit_model(time_series = timeseries_ny$value*1.1, #NOT WHOLE NUMBERS
+                  age_dist = age_distribution_ny$proportion, 
+                  parmset = fixed_parameters,
+                  yinit = yinit,
+                  yinit.vector = yinit.vector)
+
+error2 = fit_model(time_series = timeseries_ny, #NOT A VECTOR
+                  age_dist = age_distribution_ny$proportion, 
+                  parmset = fixed_parameters,
+                  yinit = yinit,
+                  yinit.vector = yinit.vector)
+
+error3 = fit_model(time_series = timeseries_ny$value, 
+                  age_dist = age_distribution_ny, #NOT A VECTOR 
+                  parmset = fixed_parameters,
+                  yinit = yinit,
+                  yinit.vector = yinit.vector)
+
+```
+
+
+
+
 
 ### Step 3: Scenario Projections
 

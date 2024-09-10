@@ -129,7 +129,7 @@ server <- function(input, output, session) {
       theme_bw() +
       geom_line(aes(x = date, y = doses, group = scenario, color = scenario)) +
       scale_y_continuous(labels = label_comma(scale = 1))+
-      facet_wrap(~immunization, ncol=3, scales = "free") +
+      facet_wrap(~immunization, ncol=2, scales = "free") +
       theme(legend.position = "top",
             axis.text = element_text(size = 15),
             strip.text = element_text(size = 15),
@@ -148,7 +148,7 @@ server <- function(input, output, session) {
       theme_bw() +
       geom_line(aes(x = date, y = median, group = scenario, color = scenario)) +
       geom_ribbon(aes(x = date, ymin = lower, ymax = upper, group = scenario, fill = scenario), alpha = 0.5) +
-      facet_wrap(~Age, ncol = 3, scales = "free") +
+      facet_wrap(~Age, ncol = 2, scales = "free") +
       theme(legend.position = "top",
             axis.text = element_text(size = 15),
             strip.text = element_text(size = 15),
@@ -162,14 +162,14 @@ server <- function(input, output, session) {
 
 
 
-  # Render the timeseries plot
+  # Render percent difference plot
   output$difference <- renderPlot({
     req(diff_data())  # Ensure filtered data is available
     ggplot(data = diff_data()) +
       theme_bw() +
-      geom_point(aes(y = reorder(scenario,desc(scenario)), x = median, group = scenario, color = scenario)) +
-      geom_errorbar(aes(y=reorder(scenario,desc(scenario)), xmin = lower, xmax = upper, group = scenario, color = scenario), alpha = 0.5,width=.5,linewidth=2) +
-      facet_wrap(~Age, ncol = 3, scales = "free") +
+      geom_point(aes(y = reorder(scenario,desc(scenario)), x = median, group = scenario, color = scenario),size=3) +
+      geom_errorbar(aes(y=reorder(scenario,desc(scenario)), xmin = lower, xmax = upper, group = scenario, color = scenario), alpha = 0.5,width=.3,linewidth=2) +
+      facet_wrap(~Age, ncol = 2, scales = "free") +
      # scale_y_reverse() +
       theme(legend.position = "top",
             axis.text = element_text(size = 15),
