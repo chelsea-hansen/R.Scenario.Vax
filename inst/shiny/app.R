@@ -129,7 +129,7 @@ server <- function(input, output, session) {
       theme_bw() +
       geom_line(aes(x = date, y = doses, group = scenario, color = scenario)) +
       scale_y_continuous(labels = label_comma(scale = 1))+
-      facet_wrap(~immunization, ncol=2, scales = "free") +
+      facet_wrap(~immunization, ncol=3, scales = "free") +
       theme(legend.position = "top",
             axis.text = element_text(size = 15),
             strip.text = element_text(size = 15),

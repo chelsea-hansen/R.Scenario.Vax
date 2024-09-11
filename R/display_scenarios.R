@@ -5,6 +5,7 @@
 #' In order for the Shiny App to work, make sure that one of the scenarios is called "Counterfactual" and that projection_intervals = TRUE
 #' @export
 #' @import stringr
+#' @import ggplot2
 display_scenarios <- function() {
   app_dir <- system.file("shiny", package = "R.Scenario.Vax")
   if (app_dir == "") {

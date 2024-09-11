@@ -274,6 +274,7 @@ scenario_projection = function(fitted_parms,
       H$date = dates$new_date
       H$monoclonal_birth = cumsum(tail(parmset$monoclonal_birth,nrow(dates)))
       H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_catchup,nrow(dates)))
+      H$maternal_vax = cumsum(tail(parmset$maternal_vax,nrow(dates)))
       H$adult_vax_65to74 = cumsum(tail(adult65_unscaled,nrow(dates))) #save the version without wasted doses for plotting
       H$adult_vax_75 = cumsum(tail(adult75_unscaled,nrow(dates))) #save version without wasted doses for plotting
 
@@ -412,6 +413,7 @@ scenario_projection = function(fitted_parms,
   H$date = dates$new_date
   H$monoclonal_birth = cumsum(tail(parmset$monoclonal_birth,nrow(dates)))
   H$monoclonal_catchup = cumsum(tail(parmset$monoclonal_catchup,nrow(dates)))
+  H$maternal_vax = cumsum(tail(parmset$maternal_vax,nrow(dates)))
   H$adult_vax_65to74 = cumsum(tail(adult65_unscaled,nrow(dates))) #save the version without wasted doses for plotting
   H$adult_vax_75 = cumsum(tail(adult75_unscaled,nrow(dates))) #save version without wasted doses for plotting
 
