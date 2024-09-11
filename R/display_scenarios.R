@@ -6,6 +6,8 @@
 #' @export
 #' @import stringr
 #' @import ggplot2
+#' @import scales
+#' @import shiny
 display_scenarios <- function() {
   app_dir <- system.file("shiny", package = "R.Scenario.Vax")
   if (app_dir == "") {
