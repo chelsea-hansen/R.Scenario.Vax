@@ -9,7 +9,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs, MMWRweek, cowplot, pracma, tidyr, shiny, stringr scales
+Imports: tidycensus, dplyr, magrittr, deSolve, ggplot2, lhs, MMWRweek, cowplot, pracma, tidyr, shiny, stringr, scales
 ImportsFrom: utils tail head stats dpois optim median quantile pracma sigmoid tidyr pivot_longer pivot_wider stringr sub_str
 URL: https://github.com/chelsea-hansen/R.Scenario.Vax, https://chelsea-hansen.github.io/R.Scenario.Vax/
 BugReports: https://github.com/chelsea-hansen/R.Scenario.Vax/issues
