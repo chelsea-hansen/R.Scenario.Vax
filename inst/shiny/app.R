@@ -4,6 +4,7 @@ library(dplyr)
 library(magrittr)
 library(stringr)
 library(scales)
+library(ggplot2)
 
 
 ui <- fluidPage(
