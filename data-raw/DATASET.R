@@ -196,7 +196,7 @@ dist_by_time = dat2 %>%
   ungroup()
 
 
-age_distribution = dist_by_time %>% filter(period=="pre-pandemic") %>%
+age_distribution = dist_by_time %>% filter(period=="pre-pandemic", State %in% c("California","Georgia","Maryland","Minnesota","New York","Oregon","Tennessee")) %>%
   select("state"=State,"age_group"=new_age,"proportion"=prop)
 
 
@@ -229,7 +229,9 @@ ggplot(timeseries)+
   geom_line(aes(x=date,y=value))+
   facet_grid(rows=vars(state),scales="free")
 
-
+ggplot(age_distribution)+
+  geom_bar(aes(x=age_group,y=proportion),stat="identity")+
+  facet_wrap(~state,scales="free")
 
 usethis::use_data(timeseries, overwrite = TRUE)
 usethis::use_data(age_distribution, overwrite = TRUE)
