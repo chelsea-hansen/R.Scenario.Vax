@@ -7,13 +7,14 @@ library(tidyverse)
 library(lubridate)
 library(zoo)
 
+
 `%notin%` = Negate(`%in%`)
 
 
 # Data from RSV-NET -------------------------------------------
 dat = read.csv("data-raw/Weekly_Rates_of_Laboratory-Confirmed_RSV_Hospitalizations_from_the_RSV-NET_Surveillance_System_20240826.csv") %>%
   filter(Race=="All",Sex=="All",State!="RSV-NET",
-         Age.Category %in% c("0-<6 months","6mo-<12 months","1-4 years","5-17 years","18-49 years","50-64 years","65+ years")) %>%
+         Age.Category %in% c("0-<6 months","6mo-<12 months","1-4 years","5-17 years","18-49 years","50-64 years","65-74 years","75+ years")) %>%
   mutate(Age.Category = ifelse(Age.Category=="0-<6 months","<6m",
                                ifelse(Age.Category=="6mo-<12 months","6-11m",Age.Category)),
          mmwr_week=epiweek(Week.ending.date),
@@ -34,7 +35,7 @@ age_groups_of_interest <- c('<6m', '6-11m', '1-4 years', '5-17 years')
 
 #start with states that have begin in 2016
 
-group1 = dat %>% filter(State %in% c("California","Georgia","Maryland","Minnesota","New York","Oregon"))
+group1 = dat %>% filter(State %in% c("California","Georgia","Maryland","Minnesota","New York","Oregon","Tennessee"))
 
 grid1 = expand.grid(unique(group1$date),unique(group1$State),unique(group1$Age.Category))
 
@@ -47,7 +48,7 @@ average_rates1 <- group1 %>%
 join1  = group1 %>%
   full_join(grid1, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
   select(State,date,Age.Category,Rate) %>%
-  mutate(mmwr_week(date)) %>%
+  mutate(mmwr_week = epiweek(date)) %>%
   full_join(average_rates1, by=c("State","Age.Category","mmwr_week")) %>%
   mutate(adj_rate = ifelse(is.na(Rate),Average.Rate,Rate)) %>%
   filter(date>='2016-10-08') %>%
@@ -83,7 +84,7 @@ average_rates2 <- group2 %>%
 join2  = group2 %>%
   full_join(grid2, by=c("date"="Var1","State"="Var2","Age.Category"="Var3")) %>%
   select(State,date,Age.Category,Rate) %>%
-  mutate(mmwr_week(date)) %>%
+  mutate(mmwr_week=epiweek(date)) %>%
   full_join(average_rates2, by=c("State","Age.Category","mmwr_week")) %>%
   mutate(adj_rate = ifelse(is.na(Rate),Average.Rate,Rate)) %>%
   select(date,State,Age.Category,adj_rate)
@@ -135,7 +136,8 @@ pop=rbind(pop1,pop2) %>%
                                Five.Year.Age.Groups.Code %in% c("5-9","10-14","15-19")~"5-17 years",
                                Five.Year.Age.Groups.Code %in% c("20-24","25-29","30-34","35-39","40-44","45-49")~"18-49 years",
                                Five.Year.Age.Groups.Code %in% c("50-54","55-59","60-64")~"50-64 years",
-                               Five.Year.Age.Groups.Code %in% c("65-69","70-74","75-79","80-84","85+")~"65+ years")) %>%
+                               Five.Year.Age.Groups.Code %in% c("65-69","70-74")~"65-74 years",
+                               Five.Year.Age.Groups.Code %in% c("75-79","80-84","85+")~"75+ years")) %>%
   group_by(States,age_group,Yearly.July.1st.Estimates) %>%
   summarize(population = sum(Population))
 
@@ -158,8 +160,8 @@ dat2 = complete_data %>%
   arrange(Age.Category,State,date) %>%
   mutate(population = na_locf(population),
          count = adj_rate/100000*population,
-         new_age = factor(Age.Category, levels=c("<6m","6-11m","1-4 years","5-17 years","18-49 years","50-64 years","65+ years"),
-                          labels=c("<6m","6-11m","1-4 years","5-64 years","5-64 years","5-64 years","65+ years"))) %>%
+         new_age = factor(Age.Category, levels=c("<6m","6-11m","1-4 years","5-17 years","18-49 years","50-64 years","65-74 years","75+ years"),
+                          labels=c("<6m","6-11m","1-4 years","5-64 years","5-64 years","5-64 years","65-74 years","75+ years"))) %>%
   group_by(date,State,new_age) %>%
   summarize(count=sum(count),
             population=sum(population))
@@ -204,6 +206,11 @@ scaling = dist_by_time %>%
   pivot_wider(id_cols=c(State, new_age),names_from=period,values_from=adjust) %>%
   mutate(diff = current/`pre-pandemic`)
 
+scaling2 = scaling %>% filter(new_age %in% c("1-4 years","5-64 years")) %>%
+  group_by(State) %>%
+  summarize(scale = mean(diff),
+            scale = ifelse(scale<1,1,scale))
+
 
 
 timeseries = dat2 %>%
@@ -211,23 +218,19 @@ timeseries = dat2 %>%
   summarize(count=sum(count),
             population=sum(population)) %>%
   ungroup() %>%
+  left_join(scaling2, by='State') %>%
+  mutate(count2 = ifelse(date<'2020-04-01',count*scale,count))%>%
   group_by(State) %>%
-  mutate(smooth = round(rollmean(count,k=3,align="center",fill="extend"))) %>%
+  mutate(smooth = round(rollmean(count2,k=3,align="center",fill="extend"))) %>%
   select("state"=State,date,"value"=smooth)
 
+timeseries = timeseries %>% filter(date<'2020-03-28', state %in% c("California","Georgia","Maryland","Minnesota","New York","Oregon","Tennessee"))
+ggplot(timeseries)+
+  geom_line(aes(x=date,y=value))+
+  facet_grid(rows=vars(state),scales="free")
 
-#ggplot(dat3)+
-  #geom_line(aes(x=date,y=value))+
-  #facet_grid(rows=vars(State),scales="free")
+
 
 usethis::use_data(timeseries, overwrite = TRUE)
 usethis::use_data(age_distribution, overwrite = TRUE)
 
-
-
-
-#Age distributions
-
-
-
-#Scaling pre-2020 data?
