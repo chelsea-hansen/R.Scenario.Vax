@@ -22,9 +22,12 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 
 ## Model Structure
 
-- Infants are born into the “M” compartment with partial protection
-  against infection. As this protection wanes, they transition to the
-  “S0” compartment until they experience their first infection, “I1”.
+![](man/figures/base_model.PNG)
+
+- If no protection is given through immunizations, infants are born into
+  the “M0” compartment with partial protection against infection. As
+  this protection wanes, they transition to the “S0” compartment until
+  they experience their first infection, “I1”.
 
 - After they recover from their first infection, they have a short
   period of sterilizing immunity, “R1”. When this immunity wanes, they
@@ -37,8 +40,6 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 - A proportion of individuals who become infected will require
   hospitalizatio (compartments not shown). The risk of hospitalization
   is based on both age and number of previous infections.
-
-![](man/figures/base_model.PNG)
 
 ### Infant Immunizations
 
@@ -70,8 +71,6 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
   wanes they no longer have any protection and move to the “Si”
   compartment.
 
-![](man/figures/infant_model.PNG)
-
 ### Vaccination for Older Adults
 
 Adults over 60 who receive a vaccine have a similar risk of infection as
@@ -81,8 +80,6 @@ hospitalization given infection. Upon vaccination adults move to the
 amount of time in each of these compartments and the protection is the
 same. After this protection wanes they no longer have any protection
 against hospitalization and return to the “S3” compartment.
-
-![](man/figures/senior_model.PNG)
 
 ## Fixed Model Parameters
 
@@ -104,15 +101,15 @@ against hospitalization and return to the “S3” compartment.
 | Amplitude of seasonal forcing (*b*<sub>1</sub>)                                                          | Fitted       |
 | Phase of seasonal forcing (φ)                                                                            | Fitted       |
 | Infections that lead to reported hospitalizations (\<2m, 2-11 months fixed relative to this)             | Fitted       |
-| Infections that lead to reported hospitalizations (1-4yrs)                                               | Fitted       |
+| Infections that lead to reported hospitalizations (1-4 yrs)                                              | Fitted       |
 | Infections that lead to reported hospitalizations (5-64 yrs)                                             | Fitted       |
 | Infections that lead to reported hospitalizations (65-74 yrs)                                            | Fitted       |
 | Infections that lead to reported hospitalizations (75+ yrs)                                              | Fitted       |
 | Nirsevimab effectiveness                                                                                 | 80%          |
-| maternal vaccination effectiveness                                                                       | 55%          |
-| Duration of infant immunizations after maternal protection wanes (1/ω<sub>i</sub>)                       | 90 days      |
-| Vaccine effectiveness in older adults                                                                    | 80%          |
-| Duration of vaccine effectiveness in older adults (1/ω<sub>v</sub>)                                      | 2 years      |
+| maternal vaccination effectiveness                                                                       | 57%          |
+| Duration of infant immunizations 2\*(1/ω<sub>i</sub>)                                                    | 180 days     |
+| Vaccine effectiveness in older adults                                                                    | 75%          |
+| Duration of vaccine effectiveness in older adults 2\*(1/ω<sub>v</sub>)                                   | 2 years      |
 
 References: 1. Pitzer et al.; 2. Hodgson et al.; 3. Ohuma et al. 
 

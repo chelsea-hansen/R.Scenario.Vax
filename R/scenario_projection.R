@@ -121,7 +121,7 @@ scenario_projection = function(fitted_parms,
 
   # Compute adult vaccination doses and cumulative sum
   #assuming 25% of doses are wasted because individual already exposed or already has immunity
-  adult75_vax <- c(rep(0, length(sen1) + fill), sen75.2 *adult75_doses_last_year*.75, sen75.2 * adult75_doses*.75, rep(0, length(sen3)))[seq_along(fit_times)]
+  adult75_vax <- c(rep(0, length(sen1) + fill), sen75.2 *adult75_doses_last_year*.87, sen75.2 * adult75_doses*.87, rep(0, length(sen3)))[seq_along(fit_times)]
  #save version without wasted doses for plotting
    adult75_unscaled <- c(rep(0, length(sen1) + fill), sen75.2 *adult75_doses_last_year, sen75.2 * adult75_doses, rep(0, length(sen3)))[seq_along(fit_times)]
 
@@ -132,7 +132,7 @@ scenario_projection = function(fitted_parms,
 
   # Compute adult vaccination doses and cumulative sum
   #assuming 30% of doses are wasted because individual already exposed or has immunity
-  adult65_vax <- c(rep(0, length(sen1) + fill), sen65.2 * adult65_74_doses_last_year*.70, sen65.2 * adult65_74_doses*.70, rep(0, length(sen3)))[seq_along(fit_times)]
+  adult65_vax <- c(rep(0, length(sen1) + fill), sen65.2 * adult65_74_doses_last_year*.80, sen65.2 * adult65_74_doses*.80, rep(0, length(sen3)))[seq_along(fit_times)]
   #saving version without wasted doses for plotting
   adult65_unscaled <- c(rep(0, length(sen1) + fill), sen65.2 * adult65_74_doses_last_year, sen65.2 * adult65_74_doses, rep(0, length(sen3)))[seq_along(fit_times)]
 

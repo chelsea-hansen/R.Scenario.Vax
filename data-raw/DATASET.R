@@ -1,5 +1,5 @@
 ## code to prepare `DATASET` dataset goes here
-#rm(list=ls())
+rm(list=ls())
 library(lubridate)
 #library(cdcfluview)
 library(imputeTS)

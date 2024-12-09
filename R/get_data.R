@@ -76,7 +76,7 @@ pop = tidycensus::get_estimates(
 
   adults=c(pop$population[2:7])
   infants = rep(pop$population[1]*.034,6)
-  children = c(pop$population[1]*.2, rep(pop$population[2]*.6))
+  children = c(pop$population[1]*.2, rep(pop$population[1]*.6))
   all_ages = c(infants,children, adults)
   yinit = burn_in*all_ages
 
@@ -148,11 +148,11 @@ pop = tidycensus::get_estimates(
                 RRIn=1,
                 RRIv=1,
                 RRIs=1,
-                RRHn1=.2,
-                RRHn2=.2,
-                RRHv1=.45,
-                RRHv2=.45,
-                RRHs=.2)
+                RRHn1=.01,
+                RRHn2=.01,
+                RRHv1=.3,
+                RRHv2=.3,
+                RRHs=.25)
 
   return(list(parmset,yinit, yinit.vector))
 }
