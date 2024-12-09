@@ -8,8 +8,8 @@
 <title>Scenario Projections for RSV Hospitalizations • R.Scenario.Vax</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Scenario Projections for RSV Hospitalizations">
 <meta name="description" content="This package designed to provide Scenario projections for RSV hospitalizations in the context of new vaccines and immunizations.">
 <meta property="og:description" content="This package designed to provide Scenario projections for RSV hospitalizations in the context of new vaccines and immunizations.">
@@ -62,13 +62,13 @@
 <div class="section level2">
 <h2 id="model-structure">Model Structure<a class="anchor" aria-label="anchor" href="#model-structure"></a>
 </h2>
+<p><img src="reference/figures/base_model.PNG"></p>
 <ul>
-<li><p>Infants are born into the “M” compartment with partial protection against infection. As this protection wanes, they transition to the “S0” compartment until they experience their first infection, “I1”.</p></li>
+<li><p>If no protection is given through immunizations, infants are born into the “M0” compartment with partial protection against infection. As this protection wanes, they transition to the “S0” compartment until they experience their first infection, “I1”.</p></li>
 <li><p>After they recover from their first infection, they have a short period of sterilizing immunity, “R1”. When this immunity wanes, they are susceptible again, “S1”, but with lower risk of infection.</p></li>
 <li><p>After each subsequent infection individuals are less infectious, recover more quickly, have a longer duration of immunity and a lower risk of future infections.</p></li>
 <li><p>A proportion of individuals who become infected will require hospitalizatio (compartments not shown). The risk of hospitalization is based on both age and number of previous infections.</p></li>
 </ul>
-<p><img src="reference/figures/base_model.PNG"></p>
 <div class="section level3">
 <h3 id="infant-immunizations">Infant Immunizations<a class="anchor" aria-label="anchor" href="#infant-immunizations"></a>
 </h3>
@@ -79,13 +79,11 @@
 <li><p>After the protection against infection wanes, they continue to have protection against hospitalization given infection, “Mn2”. After this protection wanes they no longer have any protection and move to the “Si” compartment.</p></li>
 <li><p>Some infants receive a catch-up dose of monoclonal antibodies before the RSV season. which confers protection against hospitalization but not protection against infection. These infants move from “S0” to “N1” and then to “N2”. Infants spend the same length of time in “N1” and “N2” and the level of protection is the same. After this protection wanes they no longer have any protection and move to the “Si” compartment.</p></li>
 </ul>
-<p><img src="reference/figures/infant_model.PNG"></p>
 </div>
 <div class="section level3">
 <h3 id="vaccination-for-older-adults">Vaccination for Older Adults<a class="anchor" aria-label="anchor" href="#vaccination-for-older-adults"></a>
 </h3>
 <p>Adults over 60 who receive a vaccine have a similar risk of infection as adults in the “S3” compartment, but have some protection against hospitalization given infection. Upon vaccination adults move to the “Vs1” compartment and then the “Vs2” compartment. They spend the same amount of time in each of these compartments and the protection is the same. After this protection wanes they no longer have any protection against hospitalization and return to the “S3” compartment.</p>
-<p><img src="reference/figures/senior_model.PNG"></p>
 </div>
 </div>
 <div class="section level2">
@@ -177,7 +175,7 @@
 <td>Fitted</td>
 </tr>
 <tr class="odd">
-<td>Infections that lead to reported hospitalizations (1-4yrs)</td>
+<td>Infections that lead to reported hospitalizations (1-4 yrs)</td>
 <td>Fitted</td>
 </tr>
 <tr class="even">
@@ -198,18 +196,18 @@
 </tr>
 <tr class="even">
 <td>maternal vaccination effectiveness</td>
-<td>55%</td>
+<td>57%</td>
 </tr>
 <tr class="odd">
-<td>Duration of infant immunizations after maternal protection wanes (1/ω<sub>i</sub>)</td>
-<td>90 days</td>
+<td>Duration of infant immunizations 2*(1/ω<sub>i</sub>)</td>
+<td>180 days</td>
 </tr>
 <tr class="even">
 <td>Vaccine effectiveness in older adults</td>
-<td>80%</td>
+<td>75%</td>
 </tr>
 <tr class="odd">
-<td>Duration of vaccine effectiveness in older adults (1/ω<sub>v</sub>)</td>
+<td>Duration of vaccine effectiveness in older adults 2*(1/ω<sub>v</sub>)</td>
 <td>2 years</td>
 </tr>
 </tbody>
