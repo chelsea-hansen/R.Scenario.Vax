@@ -22,7 +22,7 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 
 ## Model Structure
 
-![](man/figures/base_model.PNG)
+![](man/figures/README-base_model.PNG)
 
 - If no protection is given through immunizations, infants are born into
   the “M0” compartment with partial protection against infection. As
@@ -83,33 +83,38 @@ against hospitalization and return to the “S3” compartment.
 
 ## Fixed Model Parameters
 
-| Parameter                                                                                                | Value        |
-|----------------------------------------------------------------------------------------------------------|--------------|
-| <sup>1</sup>Duration of infectiousness - first infection (1/γ<sub>1</sub>)                               | 10 days      |
-| <sup>1</sup>Duration of infectiousness - second infection (1/γ<sub>2</sub>)                              | 7 days       |
-| <sup>1</sup>Duration of infectiousness - third or later infection (1/γ<sub>3</sub>)                      | 5 days       |
-| <sup>2</sup>Relative risk of infection following first infection (σ<sub>1</sub>)                         | 0.89         |
-| <sup>2</sup>Relative risk of infection following second infection (σ<sub>2</sub>)                        | 0.72         |
-| <sup>2</sup>Relative risk of infection following third or later infection (σ<sub>3</sub>)                | 0.24         |
-| Relative risk of infection with maternal immunity (same as RR following third infection) (σ<sub>3</sub>) | 0.24         |
-| <sup>1</sup>Duration of maternal immunity (1/ω<sub>1</sub>)                                              | 90 days      |
-| <sup>3</sup>Duration of immunity following first and second infections (1/ω<sub>2</sub>)                 | 182.625 days |
-| <sup>2</sup>Duration of immunity following third or later infections (1/ω<sub>3</sub>)                   | 358.9 days   |
-| <sup>1</sup>Relative infectiousness - second infections (ρ<sub>1</sub>)                                  | 0.75         |
-| <sup>1</sup>Relative infectiousness - third or later infections (ρ<sub>2</sub>)                          | 0.51         |
-| Baseline transmission rate (β)                                                                           | Fitted       |
-| Amplitude of seasonal forcing (*b*<sub>1</sub>)                                                          | Fitted       |
-| Phase of seasonal forcing (φ)                                                                            | Fitted       |
-| Infections that lead to reported hospitalizations (\<2m, 2-11 months fixed relative to this)             | Fitted       |
-| Infections that lead to reported hospitalizations (1-4 yrs)                                              | Fitted       |
-| Infections that lead to reported hospitalizations (5-64 yrs)                                             | Fitted       |
-| Infections that lead to reported hospitalizations (65-74 yrs)                                            | Fitted       |
-| Infections that lead to reported hospitalizations (75+ yrs)                                              | Fitted       |
-| Nirsevimab effectiveness                                                                                 | 80%          |
-| maternal vaccination effectiveness                                                                       | 57%          |
-| Duration of infant immunizations 2\*(1/ω<sub>i</sub>)                                                    | 180 days     |
-| Vaccine effectiveness in older adults                                                                    | 75%          |
-| Duration of vaccine effectiveness in older adults 2\*(1/ω<sub>v</sub>)                                   | 2 years      |
+| Parameter                                                                                                | Value          |
+|----------------------------------------------------------------------------------------------------------|----------------|
+| <sup>1</sup>Duration of infectiousness - first infection (1/γ<sub>1</sub>)                               | 10 days        |
+| <sup>1</sup>Duration of infectiousness - second infection (1/γ<sub>2</sub>)                              | 7 days         |
+| <sup>1</sup>Duration of infectiousness - third or later infection (1/γ<sub>3</sub>)                      | 5 days         |
+| <sup>2</sup>Relative risk of infection following first infection (σ<sub>1</sub>)                         | 0.89           |
+| <sup>2</sup>Relative risk of infection following second infection (σ<sub>2</sub>)                        | 0.72           |
+| <sup>2</sup>Relative risk of infection following third or later infection (σ<sub>3</sub>)                | 0.24           |
+| Relative risk of infection with maternal immunity (same as RR following third infection) (σ<sub>3</sub>) | 0.24           |
+| <sup>1</sup>Duration of maternal immunity (1/ω<sub>1</sub>)                                              | 90 days        |
+| <sup>3</sup>Duration of immunity following first and second infections (1/ω<sub>2</sub>)                 | 182.625 days   |
+| <sup>2</sup>Duration of immunity following third or later infections (1/ω<sub>3</sub>)                   | 358.9 days     |
+| <sup>1</sup>Relative infectiousness - second infections (ρ<sub>1</sub>)                                  | 0.75           |
+| <sup>1</sup>Relative infectiousness - third or later infections (ρ<sub>2</sub>)                          | 0.51           |
+| Baseline transmission rate (β)                                                                           | Fitted         |
+| Amplitude of seasonal forcing (*b*<sub>1</sub>)                                                          | Fitted         |
+| Phase of seasonal forcing (φ)                                                                            | Fitted         |
+| Infections that lead to reported hospitalizations (\<2m, 2-11 months fixed relative to this)             | Fitted         |
+| Infections that lead to reported hospitalizations (1-4 yrs)                                              | Fitted         |
+| Infections that lead to reported hospitalizations (5-64 yrs)                                             | Fitted         |
+| Infections that lead to reported hospitalizations (65-74 yrs)                                            | Fitted         |
+| Infections that lead to reported hospitalizations (75+ yrs)                                              | Fitted         |
+| Birth rate for newborns who are not protected by immunizations (B1)                                      | Scenario Based |
+| birth rate for newborns protected by monoclonal antibodies (B2)                                          | Scenario Based |
+| birth rate for newborns protected by maternal vaccination (B3)                                           | Scenario Based |
+| Catch-up immunization rate for monoclonal antibodies (U)                                                 | Scenario Based |
+| Vaccination rate for older adults (V)                                                                    | Scenario Based |
+| Nirsevimab effectiveness                                                                                 | 80%            |
+| maternal vaccination effectiveness                                                                       | 57%            |
+| Duration of infant immunizations (both monoclonals and maternal vaccination) 2\*(1/ω<sub>i</sub>)        | 180 days       |
+| Vaccine effectiveness in older adults                                                                    | 75%            |
+| Duration of vaccine effectiveness in older adults 2\*(1/ω<sub>v</sub>)                                   | 2 years        |
 
 References: 1. Pitzer et al.; 2. Hodgson et al.; 3. Ohuma et al. 
 

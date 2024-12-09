@@ -32,7 +32,7 @@ remotes::install_github("chelsea-hansen/R.Scenario.Vax")
 ```
 
 ## Model Structure
-![](man/figures/base_model.PNG)
+![](man/figures/README-base_model.PNG)
 
 * If no protection is given through immunizations, infants are born into the “M0” compartment with partial protection against infection. As this protection wanes, they transition to the “S0” compartment until they experience their first infection, “I1”.
 
@@ -84,9 +84,14 @@ Adults over 60 who receive a vaccine have a similar risk of infection as adults 
 |Infections that lead to reported hospitalizations (5-64 yrs)|Fitted|
 |Infections that lead to reported hospitalizations (65-74 yrs)|Fitted|
 |Infections that lead to reported hospitalizations (75+ yrs)|Fitted|
+|Birth rate for newborns who are not protected by immunizations (B1)|Scenario Based|
+|birth rate for newborns protected by monoclonal antibodies (B2)|Scenario Based|
+|birth rate for newborns protected by maternal vaccination (B3)|Scenario Based|
+|Catch-up immunization rate for monoclonal antibodies (U)|Scenario Based|
+|Vaccination rate for older adults (V)|Scenario Based|
 |Nirsevimab effectiveness |80%|
 |maternal vaccination effectiveness |57%|
-|Duration of infant immunizations 2*(1/&omega;<sub>i</sub>)|180 days|
+|Duration of infant immunizations (both monoclonals and maternal vaccination) 2*(1/&omega;<sub>i</sub>)|180 days|
 |Vaccine effectiveness in older adults |75%|
 |Duration of vaccine effectiveness in older adults 2*(1/&omega;<sub>v</sub>)|2 years|
 
