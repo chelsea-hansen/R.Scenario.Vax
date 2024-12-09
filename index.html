@@ -62,7 +62,7 @@
 <div class="section level2">
 <h2 id="model-structure">Model Structure<a class="anchor" aria-label="anchor" href="#model-structure"></a>
 </h2>
-<p><img src="reference/figures/base_model.PNG"></p>
+<p><img src="reference/figures/README-base_model.PNG"></p>
 <ul>
 <li><p>If no protection is given through immunizations, infants are born into the “M0” compartment with partial protection against infection. As this protection wanes, they transition to the “S0” compartment until they experience their first infection, “I1”.</p></li>
 <li><p>After they recover from their first infection, they have a short period of sterilizing immunity, “R1”. When this immunity wanes, they are susceptible again, “S1”, but with lower risk of infection.</p></li>
@@ -91,8 +91,8 @@
 </h2>
 <table class="table">
 <colgroup>
-<col width="88%">
-<col width="11%">
+<col width="86%">
+<col width="13%">
 </colgroup>
 <thead><tr class="header">
 <th>Parameter</th>
@@ -191,22 +191,42 @@
 <td>Fitted</td>
 </tr>
 <tr class="odd">
+<td>Birth rate for newborns who are not protected by immunizations (B1)</td>
+<td>Scenario Based</td>
+</tr>
+<tr class="even">
+<td>birth rate for newborns protected by monoclonal antibodies (B2)</td>
+<td>Scenario Based</td>
+</tr>
+<tr class="odd">
+<td>birth rate for newborns protected by maternal vaccination (B3)</td>
+<td>Scenario Based</td>
+</tr>
+<tr class="even">
+<td>Catch-up immunization rate for monoclonal antibodies (U)</td>
+<td>Scenario Based</td>
+</tr>
+<tr class="odd">
+<td>Vaccination rate for older adults (V)</td>
+<td>Scenario Based</td>
+</tr>
+<tr class="even">
 <td>Nirsevimab effectiveness</td>
 <td>80%</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>maternal vaccination effectiveness</td>
 <td>57%</td>
 </tr>
-<tr class="odd">
-<td>Duration of infant immunizations 2*(1/ω<sub>i</sub>)</td>
+<tr class="even">
+<td>Duration of infant immunizations (both monoclonals and maternal vaccination) 2*(1/ω<sub>i</sub>)</td>
 <td>180 days</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Vaccine effectiveness in older adults</td>
 <td>75%</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Duration of vaccine effectiveness in older adults 2*(1/ω<sub>v</sub>)</td>
 <td>2 years</td>
 </tr>
